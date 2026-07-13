@@ -19,7 +19,7 @@ export function PagePlaceholder({ title, description, children }: PagePlaceholde
   return (
     <PageTransition>
       <Stack alignItems="center" sx={{ p: 3, pt: 6 }}>
-        <Card sx={{ maxWidth: 480, width: '100%', borderRadius: 4 }} elevation={2}>
+        <Card sx={{ maxWidth: 480, width: '100%' }}>
           <CardContent sx={{ p: 4 }}>
             <Stack spacing={2} alignItems="flex-start">
               <Typography variant="h4" component="h1" fontWeight={600}>

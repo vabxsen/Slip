@@ -16,7 +16,7 @@ export function NotFoundPage() {
         <Typography variant="body1" color="text.secondary">
           This page slipped away. Let&apos;s get you back home.
         </Typography>
-        <Button component={Link} to={ROUTES.home} variant="contained" sx={{ borderRadius: 5 }}>
+        <Button component={Link} to={ROUTES.home} variant="contained">
           Back to Home
         </Button>
       </Stack>

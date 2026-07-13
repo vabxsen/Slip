@@ -1,16 +1,16 @@
 import { CssBaseline } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { createAppTheme } from '@/theme';
 
 interface AppProvidersProps {
   children: ReactNode;
 }
 
-/**
- * Global providers for the app. The theme provider (Phase 3) and router
- * (Phase 2) are layered in here as they land.
- */
+/** Global providers: M3 theme (light/dark via CSS variables) + React Query. */
 export function AppProviders({ children }: AppProvidersProps) {
+  const theme = useMemo(() => createAppTheme(), []);
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -25,8 +25,10 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <CssBaseline />
-      {children}
+      <ThemeProvider theme={theme} defaultMode="system">
+        <CssBaseline enableColorScheme />
+        {children}
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

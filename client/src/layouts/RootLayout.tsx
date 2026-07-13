@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { Link, Outlet, useLocation } from 'react-router';
 import { ROUTES } from '@/app/router/paths';
 import { FullPageLoader } from '@/components/FullPageLoader';
+import { ThemeModeToggle } from '@/components/ThemeModeToggle';
 
 const NAV_ITEMS = [
   { label: 'Home', to: ROUTES.home },
@@ -21,7 +22,7 @@ export function RootLayout() {
 
   return (
     <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <Stack direction="row" spacing={1} justifyContent="center" sx={{ p: 2 }}>
+      <Stack direction="row" spacing={1} alignItems="center" justifyContent="center" sx={{ p: 2 }}>
         {NAV_ITEMS.map((item) => (
           <Button
             key={item.to}
@@ -29,11 +30,11 @@ export function RootLayout() {
             to={item.to}
             size="small"
             variant={location.pathname === item.to ? 'contained' : 'text'}
-            sx={{ borderRadius: 5 }}
           >
             {item.label}
           </Button>
         ))}
+        <ThemeModeToggle />
       </Stack>
       <Box component="main" sx={{ flex: 1 }}>
         <Suspense fallback={<FullPageLoader />}>
