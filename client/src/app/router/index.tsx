@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router';
-import { RootLayout } from '@/layouts/RootLayout';
+import { AppLayout } from '@/layouts/AppLayout';
 import { FullPageLoader } from '@/components/FullPageLoader';
 import { ROUTES } from './paths';
 
@@ -10,7 +10,7 @@ import { ROUTES } from './paths';
 export const router = createBrowserRouter([
   {
     path: ROUTES.home,
-    element: <RootLayout />,
+    element: <AppLayout />,
     HydrateFallback: FullPageLoader,
     children: [
       {
