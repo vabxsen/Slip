@@ -4,11 +4,13 @@ import { Box, IconButton, Skeleton, Stack, Tooltip, Typography } from '@mui/mate
 import QRCode from 'react-qr-code';
 import { SectionCard } from '@/components/SectionCard';
 import { showToast } from '@/store/toastStore';
+import { hostRoom } from '../services/pairingHost';
 import { buildPairUrl, usePairingStore } from '../store/pairingStore';
 
 export function PairCard() {
   const code = usePairingStore((state) => state.code);
-  const regenerate = usePairingStore((state) => state.regenerate);
+  const status = usePairingStore((state) => state.status);
+  const isBusy = status === 'creating' || status === 'idle';
 
   const copyCode = async () => {
     if (!code) return;
@@ -25,7 +27,12 @@ export function PairCard() {
       title="Pair a device"
       action={
         <Tooltip title="New code">
-          <IconButton aria-label="Generate a new pair code" onClick={regenerate} size="small">
+          <IconButton
+            aria-label="Generate a new pair code"
+            onClick={() => void hostRoom()}
+            disabled={isBusy}
+            size="small"
+          >
             <RefreshRoundedIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -62,8 +69,14 @@ export function PairCard() {
             </IconButton>
           </Tooltip>
         </Stack>
-        <Typography variant="body2" color="text.secondary" textAlign="center">
-          Scan the QR code or enter this code on another device to connect.
+        <Typography
+          variant="body2"
+          color={status === 'error' ? 'error' : 'text.secondary'}
+          textAlign="center"
+        >
+          {status === 'error'
+            ? "Couldn't reach the server. Tap refresh to try again."
+            : 'Scan the QR code or enter this code on another device to connect.'}
         </Typography>
       </Stack>
     </SectionCard>

@@ -3,13 +3,18 @@ import { create } from 'zustand';
 
 export type ConnectionQuality = 'excellent' | 'good' | 'poor' | 'unknown';
 
+/** Socket.IO signaling-channel status (distinct from peer WebRTC links). */
+export type SocketStatus = 'connecting' | 'online' | 'offline';
+
 export interface ConnectedPeer extends DeviceInfo {
   quality: ConnectionQuality;
   connectedAt: number;
 }
 
 interface ConnectionState {
+  socketStatus: SocketStatus;
   peers: ConnectedPeer[];
+  setSocketStatus: (status: SocketStatus) => void;
   addPeer: (peer: ConnectedPeer) => void;
   removePeer: (peerId: string) => void;
   setPeerQuality: (peerId: string, quality: ConnectionQuality) => void;
@@ -21,7 +26,9 @@ interface ConnectionState {
  * services (Phases 6–7); the UI only ever reads from here.
  */
 export const useConnectionStore = create<ConnectionState>((set) => ({
+  socketStatus: 'connecting',
   peers: [],
+  setSocketStatus: (socketStatus) => set({ socketStatus }),
   addPeer: (peer) =>
     set((state) => ({
       peers: [...state.peers.filter((p) => p.id !== peer.id), peer],

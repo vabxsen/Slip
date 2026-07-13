@@ -1,29 +1,22 @@
-import { PAIR_CODE_LENGTH } from '@slip/shared';
 import { create } from 'zustand';
 
-export type PairingStatus = 'idle' | 'generating' | 'ready';
+export type PairingStatus = 'idle' | 'creating' | 'ready' | 'error';
 
 interface PairingState {
+  /** This device's current pairing code, issued by the server. */
   code: string | null;
+  expiresAt: number | null;
   status: PairingStatus;
-  regenerate: () => void;
-}
-
-/**
- * TODO(phase-6): replace the local generator with a `pair:create` request to
- * the signaling server — the store shape stays identical, only the source of
- * the code changes.
- */
-function generateLocalCode(): string {
-  const max = 10 ** PAIR_CODE_LENGTH;
-  const value = crypto.getRandomValues(new Uint32Array(1))[0]! % max;
-  return String(value).padStart(PAIR_CODE_LENGTH, '0');
+  setCode: (code: string, expiresAt: number) => void;
+  setStatus: (status: PairingStatus) => void;
 }
 
 export const usePairingStore = create<PairingState>((set) => ({
-  code: generateLocalCode(),
-  status: 'ready',
-  regenerate: () => set({ code: generateLocalCode(), status: 'ready' }),
+  code: null,
+  expiresAt: null,
+  status: 'idle',
+  setCode: (code, expiresAt) => set({ code, expiresAt, status: 'ready' }),
+  setStatus: (status) => set({ status }),
 }));
 
 /** URL another device opens (or scans) to pair with this one. */
