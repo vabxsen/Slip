@@ -9,7 +9,7 @@ export default defineConfig({
     tsconfigPaths(),
     VitePWA({
       registerType: 'autoUpdate',
-      // Manifest and icons are finalized in the PWA polish phase.
+      includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Slip',
         short_name: 'Slip',
@@ -18,11 +18,43 @@ export default defineConfig({
         background_color: '#f9f9ff',
         display: 'standalone',
         start_url: '/',
+        icons: [
+          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          {
+            src: '/icons/icon-maskable-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+          {
+            src: '/icons/icon-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+      workbox: {
+        // App-shell precache; offline navigations fall back to the cached SPA shell.
+        navigateFallback: '/index.html',
       },
     }),
   ],
   server: {
     port: 5173,
     strictPort: true,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Split large, rarely-changing vendor code into its own cacheable
+        // chunk so app updates don't force users to re-download React/MUI.
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router'],
+          'vendor-mui': ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+        },
+      },
+    },
   },
 });

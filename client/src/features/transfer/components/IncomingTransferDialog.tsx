@@ -13,15 +13,16 @@ import {
   Typography,
 } from '@mui/material';
 import { formatBytes } from '@/utils/formatBytes';
+import { shouldPromptForFolder } from '../services/receiveEngine';
 import { acceptIncoming, declineIncoming } from '../services/transferActions';
 import { useIncomingRequestStore } from '../store/incomingRequestStore';
-
-const supportsDirectoryPicker = typeof window !== 'undefined' && Boolean(window.showDirectoryPicker);
 
 /** Accept/decline prompt for an inbound file batch; always mounted, self-hides. */
 export function IncomingTransferDialog() {
   const request = useIncomingRequestStore((state) => state.request);
   if (!request) return null;
+
+  const offerFolderChoice = shouldPromptForFolder();
 
   const totalSize = request.files.reduce((sum, f) => sum + f.size, 0);
 
@@ -48,10 +49,10 @@ export function IncomingTransferDialog() {
       <DialogActions sx={{ px: 3, pb: 3, flexDirection: 'column', alignItems: 'stretch', gap: 1 }}>
         <Button
           variant="contained"
-          onClick={() => acceptIncoming(supportsDirectoryPicker)}
+          onClick={() => acceptIncoming(offerFolderChoice)}
           startIcon={<FolderOpenRoundedIcon />}
         >
-          {supportsDirectoryPicker ? 'Accept & choose folder' : 'Accept'}
+          {offerFolderChoice ? 'Accept & choose folder' : 'Accept'}
         </Button>
         <Button onClick={declineIncoming} color="inherit">
           Decline

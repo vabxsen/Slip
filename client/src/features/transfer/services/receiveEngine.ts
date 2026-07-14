@@ -1,5 +1,7 @@
 import type { FileMeta, TransferControlMessage } from '@slip/shared';
+import { notify } from '@/services/notifications/notifications';
 import { useConnectionStore } from '@/store/connectionStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { showToast } from '@/store/toastStore';
 import { useActiveTransfersStore } from '../store/activeTransfersStore';
 import { useIncomingRequestStore } from '../store/incomingRequestStore';
@@ -83,18 +85,29 @@ export function declineIncomingBatch(channel: RTCDataChannel): void {
   useIncomingRequestStore.getState().clear();
 }
 
+/** Whether to offer the save-folder picker: user opted in and the browser supports it. */
+export function shouldPromptForFolder(): boolean {
+  return useSettingsStore.getState().downloadPreference === 'ask' && Boolean(window.showDirectoryPicker);
+}
+
 /** Reacts to control messages relevant to transfers *we* are receiving. */
-export function handleReceiverControl(_channel: RTCDataChannel, message: TransferControlMessage): void {
+export function handleReceiverControl(channel: RTCDataChannel, message: TransferControlMessage): void {
   const { patch } = useActiveTransfersStore.getState();
 
   switch (message.kind) {
     case 'batch-offer': {
       const peer = useConnectionStore.getState().peers[0];
+      const { autoAcceptTrusted, isTrusted } = useSettingsStore.getState();
+
       useIncomingRequestStore.getState().setRequest({
         batchId: message.batchId,
         files: message.files,
         peerName: peer?.name ?? 'Unknown device',
       });
+
+      if (peer && autoAcceptTrusted && isTrusted(peer.id)) {
+        void acceptIncomingBatch(channel, shouldPromptForFolder());
+      }
       break;
     }
     case 'file-start': {
@@ -131,6 +144,9 @@ export function handleReceiverControl(_channel: RTCDataChannel, message: Transfe
             speedBps: 0,
             completedAt: Date.now(),
           });
+          if (useSettingsStore.getState().notificationsEnabled) {
+            notify('File received', { body: active.meta.name, tag: active.fileId });
+          }
         })
         .catch((error: unknown) => {
           console.error('[transfer] failed to finalize file', error);

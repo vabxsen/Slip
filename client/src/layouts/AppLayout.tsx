@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import { Suspense } from 'react';
 import { Outlet } from 'react-router';
 import { FullPageLoader } from '@/components/FullPageLoader';
+import { OfflineBanner } from '@/components/OfflineBanner';
 import { ToastHost } from '@/components/ToastHost';
 import { useHistorySync } from '@/features/history/hooks/useHistorySync';
 import { useConnectionListeners } from '@/features/pairing/hooks/useConnectionListeners';
@@ -24,6 +25,7 @@ export function AppLayout() {
     <FabSlotProvider>
       <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
         <TopBar />
+        <OfflineBanner />
         <Box sx={{ display: 'flex', flex: 1, alignItems: 'stretch' }}>
           {isDesktop && <NavigationRail />}
           <Box

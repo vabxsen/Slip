@@ -19,6 +19,7 @@
     "@mui/material": "^7.3.1",
     "@slip/shared": "*",
     "@tanstack/react-query": "^5.84.1",
+    "firebase": "^12.16.0",
     "idb": "^7.1.1",
     "motion": "^12.23.12",
     "react": "^19.1.1",

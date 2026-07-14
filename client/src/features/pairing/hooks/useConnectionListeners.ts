@@ -2,9 +2,11 @@ import type { DeviceInfo } from '@slip/shared';
 import { useEffect } from 'react';
 import '@/features/transfer/services/transferSelfTest';
 import { handleChannelMessage, resetTransferSession } from '@/features/transfer/services/transferDispatcher';
+import { notify } from '@/services/notifications/notifications';
 import { connectSocket, getSocket } from '@/services/socket/socketClient';
 import { peerSession } from '@/services/webrtc/peerSession';
 import { useConnectionStore } from '@/store/connectionStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { showToast } from '@/store/toastStore';
 import { hostRoom } from '../services/pairingHost';
 
@@ -42,6 +44,9 @@ export function useConnectionListeners(): void {
       addPeer({ ...peer, quality: 'unknown', connectedAt: Date.now() });
       peerSession.start('responder', peer);
       showToast(`${peer.name} connected`, 'success');
+      if (useSettingsStore.getState().notificationsEnabled) {
+        notify('Device connected', { body: peer.name, tag: `peer-${peer.id}` });
+      }
     };
     const onPeerLeft = (peerId: string) => {
       const peer = useConnectionStore.getState().peers.find((p) => p.id === peerId);
