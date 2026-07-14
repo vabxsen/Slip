@@ -14,10 +14,13 @@ export interface ConnectedPeer extends DeviceInfo {
 interface ConnectionState {
   socketStatus: SocketStatus;
   peers: ConnectedPeer[];
+  /** True once the WebRTC data channel to the peer is open and usable. */
+  dataChannelReady: boolean;
   setSocketStatus: (status: SocketStatus) => void;
   addPeer: (peer: ConnectedPeer) => void;
   removePeer: (peerId: string) => void;
   setPeerQuality: (peerId: string, quality: ConnectionQuality) => void;
+  setDataChannelReady: (ready: boolean) => void;
   reset: () => void;
 }
 
@@ -28,17 +31,23 @@ interface ConnectionState {
 export const useConnectionStore = create<ConnectionState>((set) => ({
   socketStatus: 'connecting',
   peers: [],
+  dataChannelReady: false,
   setSocketStatus: (socketStatus) => set({ socketStatus }),
   addPeer: (peer) =>
     set((state) => ({
       peers: [...state.peers.filter((p) => p.id !== peer.id), peer],
     })),
-  removePeer: (peerId) => set((state) => ({ peers: state.peers.filter((p) => p.id !== peerId) })),
+  removePeer: (peerId) =>
+    set((state) => ({
+      peers: state.peers.filter((p) => p.id !== peerId),
+      dataChannelReady: state.peers.some((p) => p.id !== peerId) ? state.dataChannelReady : false,
+    })),
   setPeerQuality: (peerId, quality) =>
     set((state) => ({
       peers: state.peers.map((p) => (p.id === peerId ? { ...p, quality } : p)),
     })),
-  reset: () => set({ peers: [] }),
+  setDataChannelReady: (dataChannelReady) => set({ dataChannelReady }),
+  reset: () => set({ peers: [], dataChannelReady: false }),
 }));
 
 if (import.meta.env.DEV) {

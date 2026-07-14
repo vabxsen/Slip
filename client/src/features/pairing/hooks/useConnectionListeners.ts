@@ -1,6 +1,7 @@
 import type { DeviceInfo } from '@slip/shared';
 import { useEffect } from 'react';
 import { connectSocket, getSocket } from '@/services/socket/socketClient';
+import { peerSession } from '@/services/webrtc/peerSession';
 import { useConnectionStore } from '@/store/connectionStore';
 import { showToast } from '@/store/toastStore';
 import { hostRoom } from '../services/pairingHost';
@@ -22,18 +23,21 @@ export function useConnectionListeners(): void {
     };
     // Losing the signaling channel invalidates the pairing session: on
     // reconnect the server issues a fresh room, so stale peers must clear.
-    // Phase 7's peer-to-peer link becomes the real "connected" signal.
     const onDisconnect = () => {
       setSocketStatus('offline');
+      peerSession.stop();
       reset();
     };
 
+    // Host side: a peer joined our room — answer its upcoming WebRTC offer.
     const onPeerJoined = (peer: DeviceInfo) => {
-      addPeer({ ...peer, quality: 'good', connectedAt: Date.now() });
+      addPeer({ ...peer, quality: 'unknown', connectedAt: Date.now() });
+      peerSession.start('responder', peer);
       showToast(`${peer.name} connected`, 'success');
     };
     const onPeerLeft = (peerId: string) => {
       const peer = useConnectionStore.getState().peers.find((p) => p.id === peerId);
+      peerSession.stop();
       removePeer(peerId);
       if (peer) showToast(`${peer.name} disconnected`);
     };

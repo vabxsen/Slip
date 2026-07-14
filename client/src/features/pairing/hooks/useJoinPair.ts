@@ -2,6 +2,7 @@ import type { PairJoinError } from '@slip/shared';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { ROUTES } from '@/app/router/paths';
+import { peerSession } from '@/services/webrtc/peerSession';
 import { useConnectionStore } from '@/store/connectionStore';
 import { useDeviceStore } from '@/store/deviceStore';
 import { showToast } from '@/store/toastStore';
@@ -29,7 +30,9 @@ export function useJoinPair() {
     try {
       const result = await joinRoom(code, device);
       if (result.ok) {
-        addPeer({ ...result.peer, quality: 'good', connectedAt: Date.now() });
+        addPeer({ ...result.peer, quality: 'unknown', connectedAt: Date.now() });
+        // Joiner drives the WebRTC handshake (opens the data channel → offer).
+        peerSession.start('initiator', result.peer);
         showToast(`Connected to ${result.peer.name}`, 'success');
         navigate(ROUTES.home);
         return;
