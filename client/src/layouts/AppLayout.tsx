@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { Outlet } from 'react-router';
 import { FullPageLoader } from '@/components/FullPageLoader';
 import { ToastHost } from '@/components/ToastHost';
+import { useHistorySync } from '@/features/history/hooks/useHistorySync';
 import { useConnectionListeners } from '@/features/pairing/hooks/useConnectionListeners';
 import { useIsDesktop } from '@/hooks/useIsDesktop';
 import { BottomNavBar } from './BottomNavBar';
@@ -17,6 +18,7 @@ import { TopBar } from './TopBar';
 export function AppLayout() {
   const isDesktop = useIsDesktop();
   useConnectionListeners();
+  useHistorySync();
 
   return (
     <FabSlotProvider>
