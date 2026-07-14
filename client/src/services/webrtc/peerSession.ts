@@ -140,8 +140,6 @@ if (import.meta.env.DEV) {
     new Promise((resolve) => {
       const state = { aOpen: false, bOpen: false, received: '' as string, rtt: null as number | null };
       let chanA: RTCDataChannel | null = null;
-      let a!: PeerConnection;
-      let b!: PeerConnection;
 
       const finish = async () => {
         if (!state.aOpen || !state.bOpen || !chanA) return;
@@ -154,7 +152,7 @@ if (import.meta.env.DEV) {
         }, 200);
       };
 
-      a = new PeerConnection(
+      const a: PeerConnection = new PeerConnection(
         {
           sendDescription: (d) => void b.acceptDescription(d),
           sendCandidate: (c) => void b.acceptCandidate(c),
@@ -170,7 +168,7 @@ if (import.meta.env.DEV) {
         { polite: false, initiator: true },
       );
 
-      b = new PeerConnection(
+      const b: PeerConnection = new PeerConnection(
         {
           sendDescription: (d) => void a.acceptDescription(d),
           sendCandidate: (c) => void a.acceptCandidate(c),

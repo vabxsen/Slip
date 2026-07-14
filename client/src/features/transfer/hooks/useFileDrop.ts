@@ -1,10 +1,12 @@
 import { useRef, useState, type DragEvent } from 'react';
+import { expandDataTransferItems, type TraversedFile } from '../utils/directoryEntries';
 
 /**
  * Drag-and-drop file handling with correct enter/leave tracking (drag events
- * fire on every child element, so a depth counter keeps `isDragging` stable).
+ * fire on every child element, so a depth counter keeps `isDragging` stable)
+ * and directory-entry traversal so dropped folders keep their structure.
  */
-export function useFileDrop(onFiles: (files: File[]) => void) {
+export function useFileDrop(onFiles: (files: TraversedFile[]) => void) {
   const [isDragging, setIsDragging] = useState(false);
   const depth = useRef(0);
 
@@ -26,8 +28,22 @@ export function useFileDrop(onFiles: (files: File[]) => void) {
       event.preventDefault();
       depth.current = 0;
       setIsDragging(false);
-      const files = Array.from(event.dataTransfer.files);
-      if (files.length > 0) onFiles(files);
+
+      const { items, files: fileList } = event.dataTransfer;
+      void (async () => {
+        let result: TraversedFile[] = [];
+        if (items && items.length > 0) {
+          try {
+            result = await expandDataTransferItems(items);
+          } catch {
+            result = [];
+          }
+        }
+        if (result.length === 0) {
+          result = Array.from(fileList).map((file) => ({ file }));
+        }
+        if (result.length > 0) onFiles(result);
+      })();
     },
   };
 

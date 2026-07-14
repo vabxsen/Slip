@@ -6,16 +6,17 @@ import { useIsDesktop } from '@/hooks/useIsDesktop';
 import { showToast } from '@/store/toastStore';
 import { useFilePicker } from '../hooks/useFilePicker';
 import { useTransferStore } from '../store/transferStore';
+import type { TraversedFile } from '../utils/directoryEntries';
 
 /** Home's floating action button: pick files to send. */
 export function SendFab() {
   const isDesktop = useIsDesktop();
   const stageFiles = useTransferStore((state) => state.stageFiles);
 
-  const handleFiles = (files: File[]) => {
+  const handleFiles = (files: TraversedFile[]) => {
     stageFiles(files);
     showToast(
-      files.length === 1 ? `Added ${files[0]?.name}` : `Added ${files.length} files`,
+      files.length === 1 ? `Added ${files[0]?.file.name}` : `Added ${files.length} files`,
       'success',
     );
   };

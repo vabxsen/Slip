@@ -4,7 +4,9 @@ import { ConnectedDevicesCard } from '@/features/devices/components/ConnectedDev
 import { DeviceIdentityHeader } from '@/features/devices/components/DeviceIdentityHeader';
 import { RecentTransfersCard } from '@/features/history/components/RecentTransfersCard';
 import { PairCard } from '@/features/pairing/components/PairCard';
+import { ActiveTransfersCard } from '@/features/transfer/components/ActiveTransfersCard';
 import { DropZone } from '@/features/transfer/components/DropZone';
+import { IncomingTransferDialog } from '@/features/transfer/components/IncomingTransferDialog';
 import { SendFab } from '@/features/transfer/components/SendFab';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
@@ -29,6 +31,11 @@ export function HomePage() {
             <DeviceIdentityHeader />
           </motion.div>
         </Grid>
+        <Grid size={12}>
+          <motion.div variants={item}>
+            <ActiveTransfersCard />
+          </motion.div>
+        </Grid>
         <Grid size={{ xs: 12, md: 5 }}>
           <motion.div variants={item} style={{ height: '100%' }}>
             <PairCard />
@@ -51,6 +58,7 @@ export function HomePage() {
         </Grid>
       </Grid>
       <SendFab />
+      <IncomingTransferDialog />
     </motion.div>
   );
 }

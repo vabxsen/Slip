@@ -1,26 +1,30 @@
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
-import { Box, Stack, Typography } from '@mui/material';
+import FolderOpenRoundedIcon from '@mui/icons-material/FolderOpenRounded';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { motion } from 'motion/react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import { showToast } from '@/store/toastStore';
 import { useFileDrop } from '../hooks/useFileDrop';
 import { useFilePicker } from '../hooks/useFilePicker';
 import { useTransferStore } from '../store/transferStore';
+import type { TraversedFile } from '../utils/directoryEntries';
 import { StagedFilesList } from './StagedFilesList';
 
 /** Large drop target + click-to-browse area; staged files appear below it. */
 export function DropZone() {
   const stageFiles = useTransferStore((state) => state.stageFiles);
 
-  const handleFiles = (files: File[]) => {
+  const handleFiles = (files: TraversedFile[]) => {
     stageFiles(files);
     showToast(
-      files.length === 1 ? `Added ${files[0]?.name}` : `Added ${files.length} files`,
+      files.length === 1 ? `Added ${files[0]?.file.name}` : `Added ${files.length} files`,
       'success',
     );
   };
 
   const { isDragging, dropHandlers } = useFileDrop(handleFiles);
   const { openPicker, input } = useFilePicker(handleFiles);
+  const { openPicker: openFolderPicker, input: folderInput } = useFilePicker(handleFiles, { directory: true });
 
   return (
     <Box sx={{ height: '100%' }}>
@@ -34,7 +38,7 @@ export function DropZone() {
           tabIndex={0}
           aria-label="Add files to send: drop files here or press Enter to browse"
           onClick={openPicker}
-          onKeyDown={(e) => {
+          onKeyDown={(e: KeyboardEvent) => {
             if (e.key === 'Enter' || e.key === ' ') openPicker();
           }}
           {...dropHandlers}
@@ -63,11 +67,22 @@ export function DropZone() {
             <Typography variant="body2" color="text.secondary">
               or click anywhere in this area to browse
             </Typography>
+            <Button
+              size="small"
+              startIcon={<FolderOpenRoundedIcon fontSize="small" />}
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation();
+                openFolderPicker();
+              }}
+            >
+              Select a folder
+            </Button>
           </Stack>
           <StagedFilesList />
         </Box>
       </motion.div>
       {input}
+      {folderInput}
     </Box>
   );
 }

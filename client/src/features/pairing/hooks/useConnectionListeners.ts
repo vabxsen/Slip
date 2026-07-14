@@ -1,5 +1,7 @@
 import type { DeviceInfo } from '@slip/shared';
 import { useEffect } from 'react';
+import '@/features/transfer/services/transferSelfTest';
+import { handleChannelMessage, resetTransferSession } from '@/features/transfer/services/transferDispatcher';
 import { connectSocket, getSocket } from '@/services/socket/socketClient';
 import { peerSession } from '@/services/webrtc/peerSession';
 import { useConnectionStore } from '@/store/connectionStore';
@@ -8,14 +10,19 @@ import { hostRoom } from '../services/pairingHost';
 
 /**
  * App-level effect (mounted once): opens the signaling socket, keeps the
- * pairing code fresh across reconnects, and mirrors peer presence into the
- * connection store. Every socket→store binding lives here so components stay
- * declarative.
+ * pairing code fresh across reconnects, mirrors peer presence into the
+ * connection store, and routes data-channel messages to the transfer engine.
+ * Every socket→store binding lives here so components stay declarative.
  */
 export function useConnectionListeners(): void {
   useEffect(() => {
     const socket = getSocket();
     const { setSocketStatus, addPeer, removePeer, reset } = useConnectionStore.getState();
+
+    peerSession.setMessageHandler((data) => {
+      const channel = peerSession.getChannel();
+      if (channel) handleChannelMessage(channel, data);
+    });
 
     const onConnect = () => {
       setSocketStatus('online');
@@ -26,6 +33,7 @@ export function useConnectionListeners(): void {
     const onDisconnect = () => {
       setSocketStatus('offline');
       peerSession.stop();
+      resetTransferSession('Connection lost');
       reset();
     };
 
@@ -38,6 +46,7 @@ export function useConnectionListeners(): void {
     const onPeerLeft = (peerId: string) => {
       const peer = useConnectionStore.getState().peers.find((p) => p.id === peerId);
       peerSession.stop();
+      resetTransferSession('Device disconnected');
       removePeer(peerId);
       if (peer) showToast(`${peer.name} disconnected`);
     };
