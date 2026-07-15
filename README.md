@@ -84,14 +84,30 @@ client/src/
 
 ## Deploying
 
-The client deploys to **Firebase Hosting**; the signaling server deploys separately to any Node
-host (Cloud Run, Render, etc.) since Firebase Hosting only serves static files.
+The client deploys to **Firebase Hosting**; the signaling server deploys to **Google Cloud Run**
+(via the repo-root `Dockerfile`) since Firebase Hosting only serves static files.
+
+**Live deployment:**
+
+- Client: https://slip6.web.app
+- Signaling server: https://slip-signaling-773005648986.us-central1.run.app
 
 ```bash
+# Server (from repo root — Dockerfile needs the monorepo context)
+gcloud run deploy slip-signaling --source . --region us-central1 \
+  --allow-unauthenticated --set-env-vars CORS_ORIGINS=https://slip6.web.app
+
+# Client
+echo "VITE_SERVER_URL=<your Cloud Run URL>" > client/.env.production.local
 npm run build -w @slip/client
-firebase deploy --only hosting   # requires `firebase init hosting` with your project first
+firebase deploy --only hosting
 ```
 
-`firebase.json` at the repo root points hosting at `client/dist` with SPA rewrites and long-term
-caching for hashed assets. Set `client/.env`'s `VITE_SERVER_URL` to your deployed signaling
-server's URL before building.
+`firebase.json` points Hosting at `client/dist` with SPA rewrites and long-term caching for
+hashed assets. The `Dockerfile` builds `@slip/server` in a workspace-aware stage (so
+`@slip/shared` resolves), bundles it with `tsup`, then strips the workspace-only dependency
+entry before the production `npm install` in the runtime stage.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
