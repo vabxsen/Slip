@@ -4,6 +4,7 @@ import { Outlet } from 'react-router';
 import { FullPageLoader } from '@/components/FullPageLoader';
 import { OfflineBanner } from '@/components/OfflineBanner';
 import { ToastHost } from '@/components/ToastHost';
+import { useAuthListener } from '@/features/auth/hooks/useAuthListener';
 import { useHistorySync } from '@/features/history/hooks/useHistorySync';
 import { useConnectionListeners } from '@/features/pairing/hooks/useConnectionListeners';
 import { useIsDesktop } from '@/hooks/useIsDesktop';
@@ -20,6 +21,7 @@ export function AppLayout() {
   const isDesktop = useIsDesktop();
   useConnectionListeners();
   useHistorySync();
+  useAuthListener();
 
   return (
     <FabSlotProvider>

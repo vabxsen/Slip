@@ -4,6 +4,7 @@ import { AppearanceSection } from '@/features/settings/components/AppearanceSect
 import { DeviceSection } from '@/features/settings/components/DeviceSection';
 import { NotificationsSection } from '@/features/settings/components/NotificationsSection';
 import { TransferSettingsSection } from '@/features/settings/components/TransferSettingsSection';
+import { AccountSection } from '@/features/auth/components/AccountSection';
 import { PageTransition } from '@/components/PageTransition';
 import { usePageTitle } from '@/hooks/usePageTitle';
 
@@ -13,6 +14,7 @@ export function SettingsPage() {
   return (
     <PageTransition>
       <Stack spacing={2.5} sx={{ maxWidth: 640, mx: 'auto' }}>
+        <AccountSection />
         <AppearanceSection />
         <DeviceSection />
         <TransferSettingsSection />
