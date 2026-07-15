@@ -2,7 +2,6 @@ import { AppBar, Toolbar, Box } from '@mui/material';
 import { Link } from 'react-router';
 import { ROUTES } from '@/app/router/paths';
 import { BrandLogo } from '@/components/BrandLogo';
-import { ThemeModeToggle } from '@/components/ThemeModeToggle';
 
 export function TopBar() {
   return (
@@ -15,8 +14,6 @@ export function TopBar() {
         >
           <BrandLogo />
         </Box>
-        <Box sx={{ flex: 1 }} />
-        <ThemeModeToggle />
       </Toolbar>
     </AppBar>
   );

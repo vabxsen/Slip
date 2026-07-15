@@ -3,6 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useMemo, type ReactNode } from 'react';
 import { createAppTheme } from '@/theme';
+import { useSettingsStore } from '@/store/settingsStore';
 import { queryClient } from './queryClient';
 
 interface AppProvidersProps {
@@ -11,7 +12,8 @@ interface AppProvidersProps {
 
 /** Global providers: M3 theme (light/dark via CSS variables) + React Query. */
 export function AppProviders({ children }: AppProvidersProps) {
-  const theme = useMemo(() => createAppTheme(), []);
+  const seedColor = useSettingsStore((state) => state.seedColor);
+  const theme = useMemo(() => createAppTheme(seedColor), [seedColor]);
 
   return (
     <QueryClientProvider client={queryClient}>

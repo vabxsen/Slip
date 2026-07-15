@@ -3,6 +3,7 @@ import { AboutSection } from '@/features/settings/components/AboutSection';
 import { AppearanceSection } from '@/features/settings/components/AppearanceSection';
 import { DeviceSection } from '@/features/settings/components/DeviceSection';
 import { NotificationsSection } from '@/features/settings/components/NotificationsSection';
+import { PersonalInfoSection } from '@/features/settings/components/PersonalInfoSection';
 import { TransferSettingsSection } from '@/features/settings/components/TransferSettingsSection';
 import { AccountSection } from '@/features/auth/components/AccountSection';
 import { PageTransition } from '@/components/PageTransition';
@@ -15,6 +16,7 @@ export function SettingsPage() {
     <PageTransition>
       <Stack spacing={2.5} sx={{ maxWidth: 640, mx: 'auto' }}>
         <AccountSection />
+        <PersonalInfoSection />
         <AppearanceSection />
         <DeviceSection />
         <TransferSettingsSection />
