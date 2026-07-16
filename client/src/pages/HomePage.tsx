@@ -1,6 +1,5 @@
 import { Grid } from '@mui/material';
 import { motion, type Variants } from 'motion/react';
-import { ConnectedDevicesCard } from '@/features/devices/components/ConnectedDevicesCard';
 import { DeviceIdentityHeader } from '@/features/devices/components/DeviceIdentityHeader';
 import { RecentTransfersCard } from '@/features/history/components/RecentTransfersCard';
 import { PairCard } from '@/features/pairing/components/PairCard';
@@ -46,13 +45,8 @@ export function HomePage() {
             <DropZone />
           </motion.div>
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <motion.div variants={item} style={{ height: '100%' }}>
-            <ConnectedDevicesCard />
-          </motion.div>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <motion.div variants={item} style={{ height: '100%' }}>
+        <Grid size={12}>
+          <motion.div variants={item}>
             <RecentTransfersCard />
           </motion.div>
         </Grid>

@@ -2,6 +2,7 @@
 export const ROUTES = {
   home: '/',
   pair: '/pair',
+  devices: '/devices',
   history: '/history',
   settings: '/settings',
 } as const;

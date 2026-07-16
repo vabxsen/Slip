@@ -1,3 +1,5 @@
+import DevicesOutlinedIcon from '@mui/icons-material/DevicesOutlined';
+import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
 import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
 import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
@@ -22,6 +24,12 @@ export const NAV_ITEMS: NavItem[] = [
     to: ROUTES.pair,
     Icon: QrCodeScannerRoundedIcon,
     ActiveIcon: QrCodeScannerRoundedIcon,
+  },
+  {
+    label: 'Devices',
+    to: ROUTES.devices,
+    Icon: DevicesOutlinedIcon,
+    ActiveIcon: DevicesRoundedIcon,
   },
   {
     label: 'History',
