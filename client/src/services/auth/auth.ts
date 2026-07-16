@@ -6,9 +6,14 @@ let authPromise: Promise<Auth> | null = null;
 function getAuthInstance(): Promise<Auth> | null {
   const appPromise = getFirebaseApp();
   if (!firebaseConfigured() || !appPromise) return null;
-  authPromise ??= Promise.all([appPromise, import('firebase/auth')]).then(([app, mod]) =>
-    mod.getAuth(app),
-  );
+  authPromise ??= Promise.all([appPromise, import('firebase/auth')])
+    .then(([app, mod]) => mod.getAuth(app))
+    .catch((error: unknown) => {
+      // Clear the memoized promise on failure so a later retry isn't
+      // permanently stuck on the same rejected promise.
+      authPromise = null;
+      throw error;
+    });
   return authPromise;
 }
 

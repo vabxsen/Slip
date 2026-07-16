@@ -11,11 +11,9 @@ export interface TrustedDevice {
 
 export interface PersonalInfo {
   fullName: string;
-  email: string;
-  phone: string;
 }
 
-const EMPTY_PERSONAL_INFO: PersonalInfo = { fullName: '', email: '', phone: '' };
+const EMPTY_PERSONAL_INFO: PersonalInfo = { fullName: '' };
 
 interface SettingsState {
   /** 'ask' offers a save-folder picker on supporting browsers; 'auto' always downloads to Downloads. */

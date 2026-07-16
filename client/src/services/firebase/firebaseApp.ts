@@ -25,6 +25,14 @@ let appPromise: Promise<FirebaseApp> | null = null;
  */
 export function getFirebaseApp(): Promise<FirebaseApp> | null {
   if (!firebaseConfigured()) return null;
-  appPromise ??= import('firebase/app').then(({ initializeApp }) => initializeApp(config));
+  appPromise ??= import('firebase/app')
+    .then(({ initializeApp }) => initializeApp(config))
+    .catch((error: unknown) => {
+      // Don't let a transient failure (flaky network, stale chunk after a
+      // redeploy) permanently poison the memoized promise — clear it so the
+      // next caller gets a fresh attempt instead of hanging forever.
+      appPromise = null;
+      throw error;
+    });
   return appPromise;
 }

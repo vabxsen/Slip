@@ -1,90 +1,107 @@
+import EditRoundedIcon from '@mui/icons-material/EditRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-import { Button, Stack, TextField, Typography } from '@mui/material';
-import { useEffect } from 'react';
+import { Button, IconButton, Stack, TextField, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { SectionCard } from '@/components/SectionCard';
-import { useSettingsStore, type PersonalInfo } from '@/store/settingsStore';
+import { useAuthStore } from '@/features/auth/store/authStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { showToast } from '@/store/toastStore';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^[\d\s()+-]{7,20}$/;
+interface NameFormValues {
+  fullName: string;
+}
 
 export function PersonalInfoSection() {
+  const user = useAuthStore((state) => state.user);
   const personalInfo = useSettingsStore((state) => state.personalInfo);
   const setPersonalInfo = useSettingsStore((state) => state.setPersonalInfo);
+  const [isEditing, setIsEditing] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
-    formState: { errors, isDirty, isSubmitting },
-  } = useForm<PersonalInfo>({ defaultValues: personalInfo });
+    formState: { errors },
+  } = useForm<NameFormValues>({ defaultValues: { fullName: personalInfo.fullName } });
 
-  useEffect(() => reset(personalInfo), [personalInfo, reset]);
+  // Seed the name from the Google account on first sign-in — never
+  // overwrites a name the user has already set or customized.
+  useEffect(() => {
+    if (user?.displayName && !personalInfo.fullName) {
+      setPersonalInfo({ fullName: user.displayName });
+    }
+  }, [user, personalInfo.fullName, setPersonalInfo]);
+
+  useEffect(() => reset({ fullName: personalInfo.fullName }), [personalInfo.fullName, reset]);
 
   const onSubmit = handleSubmit((values) => {
-    const trimmed: PersonalInfo = {
-      fullName: values.fullName.trim(),
-      email: values.email.trim(),
-      phone: values.phone.trim(),
-    };
-    setPersonalInfo(trimmed);
-    showToast('Personal info updated', 'success');
-    reset(trimmed);
+    const fullName = values.fullName.trim();
+    setPersonalInfo({ fullName });
+    reset({ fullName });
+    setIsEditing(false);
+    showToast('Name updated', 'success');
   });
+
+  const cancelEdit = () => {
+    reset({ fullName: personalInfo.fullName });
+    setIsEditing(false);
+  };
 
   return (
     <SectionCard title="Personal info">
-      <form onSubmit={onSubmit} noValidate>
-        <Stack spacing={1.5}>
-          <Typography variant="body2" color="text.secondary">
-            Stored only on this device — Slip has no backend, so this never leaves your browser.
+      <Stack spacing={2}>
+        <Typography variant="body2" color="text.secondary">
+          Stored only on this device — Slip has no backend, so this never leaves your browser.
+        </Typography>
+
+        {isEditing ? (
+          <form onSubmit={onSubmit} noValidate>
+            <Stack direction="row" spacing={1.5} alignItems="flex-start">
+              <TextField
+                fullWidth
+                autoFocus
+                size="small"
+                label="Full name"
+                error={Boolean(errors.fullName)}
+                helperText={errors.fullName?.message}
+                {...register('fullName', {
+                  maxLength: { value: 60, message: 'Keep it under 60 characters' },
+                })}
+              />
+              <Button type="submit" variant="outlined" startIcon={<SaveRoundedIcon fontSize="small" />}>
+                Save
+              </Button>
+              <Button color="inherit" onClick={cancelEdit}>
+                Cancel
+              </Button>
+            </Stack>
+          </form>
+        ) : (
+          <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
+            <Stack sx={{ minWidth: 0 }}>
+              <Typography variant="caption" color="text.secondary">
+                Full name
+              </Typography>
+              <Typography variant="body1" noWrap>
+                {personalInfo.fullName || 'Not set'}
+              </Typography>
+            </Stack>
+            <IconButton onClick={() => setIsEditing(true)} aria-label="Edit name" size="small">
+              <EditRoundedIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+        )}
+
+        <Stack>
+          <Typography variant="caption" color="text.secondary">
+            Email
           </Typography>
-          <TextField
-            fullWidth
-            size="small"
-            label="Full name"
-            error={Boolean(errors.fullName)}
-            helperText={errors.fullName?.message}
-            {...register('fullName', {
-              maxLength: { value: 60, message: 'Keep it under 60 characters' },
-            })}
-          />
-          <TextField
-            fullWidth
-            size="small"
-            type="email"
-            label="Email"
-            error={Boolean(errors.email)}
-            helperText={errors.email?.message}
-            {...register('email', {
-              validate: (value) =>
-                !value || EMAIL_PATTERN.test(value) || 'Enter a valid email address',
-            })}
-          />
-          <TextField
-            fullWidth
-            size="small"
-            type="tel"
-            label="Phone"
-            error={Boolean(errors.phone)}
-            helperText={errors.phone?.message}
-            {...register('phone', {
-              validate: (value) =>
-                !value || PHONE_PATTERN.test(value) || 'Enter a valid phone number',
-            })}
-          />
-          <Button
-            type="submit"
-            variant="outlined"
-            disabled={!isDirty || isSubmitting}
-            startIcon={<SaveRoundedIcon fontSize="small" />}
-            sx={{ alignSelf: 'flex-start' }}
-          >
-            Save
-          </Button>
+          <Typography variant="body1" color={user?.email ? 'text.primary' : 'text.secondary'} noWrap>
+            {user?.email ?? 'Sign in with Google to link your email'}
+          </Typography>
         </Stack>
-      </form>
+      </Stack>
     </SectionCard>
   );
 }

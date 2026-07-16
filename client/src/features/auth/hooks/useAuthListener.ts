@@ -24,7 +24,7 @@ export function useAuthListener(): void {
         showToast(message, 'error');
       });
 
-    void onAuthChange((firebaseUser) => {
+    onAuthChange((firebaseUser) => {
       useAuthStore.getState().setUser(
         firebaseUser
           ? {
@@ -35,10 +35,17 @@ export function useAuthListener(): void {
             }
           : null,
       );
-    }).then((unsub) => {
-      if (cancelled) unsub?.();
-      else unsubscribe = unsub;
-    });
+    })
+      .then((unsub) => {
+        if (cancelled) unsub?.();
+        else unsubscribe = unsub;
+      })
+      .catch(() => {
+        // Firebase failed to initialize (flaky network, blocked script, stale
+        // chunk after a redeploy) — fall back to signed-out rather than
+        // leaving the UI stuck on "Checking sign-in status…" forever.
+        if (!cancelled) useAuthStore.getState().setUser(null);
+      });
 
     return () => {
       cancelled = true;
