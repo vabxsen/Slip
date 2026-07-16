@@ -5,6 +5,7 @@ import { getFirestoreInstance } from './firestoreClient';
 export interface UserSettingsDoc {
   personalInfo: PersonalInfo;
   trustedDevices: TrustedDevice[];
+  username: string | null;
 }
 
 async function userDocRef(db: Firestore, uid: string) {

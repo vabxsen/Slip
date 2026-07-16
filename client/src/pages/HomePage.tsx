@@ -2,7 +2,9 @@ import { Grid } from '@mui/material';
 import { motion, type Variants } from 'motion/react';
 import { DeviceIdentityHeader } from '@/features/devices/components/DeviceIdentityHeader';
 import { RecentTransfersCard } from '@/features/history/components/RecentTransfersCard';
+import { IncomingConnectRequestDialog } from '@/features/pairing/components/IncomingConnectRequestDialog';
 import { PairCard } from '@/features/pairing/components/PairCard';
+import { SendToUserCard } from '@/features/pairing/components/SendToUserCard';
 import { ActiveTransfersCard } from '@/features/transfer/components/ActiveTransfersCard';
 import { DropZone } from '@/features/transfer/components/DropZone';
 import { IncomingTransferDialog } from '@/features/transfer/components/IncomingTransferDialog';
@@ -47,12 +49,18 @@ export function HomePage() {
         </Grid>
         <Grid size={12}>
           <motion.div variants={item}>
+            <SendToUserCard />
+          </motion.div>
+        </Grid>
+        <Grid size={12}>
+          <motion.div variants={item}>
             <RecentTransfersCard />
           </motion.div>
         </Grid>
       </Grid>
       <SendFab />
       <IncomingTransferDialog />
+      <IncomingConnectRequestDialog />
     </motion.div>
   );
 }

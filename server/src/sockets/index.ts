@@ -2,8 +2,12 @@ import type { Server as HttpServer } from 'node:http';
 import { Server } from 'socket.io';
 import { ROOM_SWEEP_INTERVAL_MS } from '../config/constants';
 import { RoomRegistry } from '../modules/pairing/roomRegistry';
+import { PresenceRegistry } from '../modules/presence/presenceRegistry';
 import { logger } from '../utils/logger';
+import { registerConnectRequestHandlers } from './handlers/connectRequestHandlers';
 import { leaveRoom, registerPairingHandlers } from './handlers/pairingHandlers';
+import { registerMessageHandlers } from './handlers/messageHandlers';
+import { registerPresenceHandlers } from './handlers/presenceHandlers';
 import { registerSignalingHandlers } from './handlers/signalingHandlers';
 import type { SlipSocketServer } from './types';
 
@@ -18,6 +22,7 @@ export function createSocketServer(httpServer: HttpServer, corsOrigins: string[]
   });
 
   const registry = new RoomRegistry();
+  const presence = new PresenceRegistry();
   const sweep = setInterval(() => registry.sweep(), ROOM_SWEEP_INTERVAL_MS);
   sweep.unref?.();
 
@@ -26,9 +31,13 @@ export function createSocketServer(httpServer: HttpServer, corsOrigins: string[]
 
     registerPairingHandlers(socket, registry);
     registerSignalingHandlers(socket, registry);
+    registerPresenceHandlers(socket, presence);
+    registerConnectRequestHandlers(socket, io, registry, presence);
+    registerMessageHandlers(socket, io, presence);
 
     socket.on('disconnect', (reason) => {
       leaveRoom(socket, registry);
+      presence.removeSocket(socket.id);
       logger.info(`socket disconnected: ${socket.id} (${reason})`);
     });
   });

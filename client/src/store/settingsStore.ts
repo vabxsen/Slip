@@ -25,6 +25,8 @@ interface SettingsState {
   seedColor: string;
   /** Local-only when signed out; synced to the user's Google account via Firestore when signed in — see useCloudSync. */
   personalInfo: PersonalInfo;
+  /** Permanent once claimed — set only via the claimUsername transaction or cloud-sync replication, never a plain edit. */
+  username: string | null;
   setDownloadPreference: (pref: DownloadPreference) => void;
   setNotificationsEnabled: (enabled: boolean) => void;
   setAutoAcceptTrusted: (enabled: boolean) => void;
@@ -33,6 +35,7 @@ interface SettingsState {
   isTrusted: (id: string) => boolean;
   setSeedColor: (hex: string) => void;
   setPersonalInfo: (info: PersonalInfo) => void;
+  setUsernameLocal: (username: string | null) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -44,6 +47,7 @@ export const useSettingsStore = create<SettingsState>()(
       trustedDevices: [],
       seedColor: SEED_COLOR,
       personalInfo: EMPTY_PERSONAL_INFO,
+      username: null,
       setDownloadPreference: (downloadPreference) => set({ downloadPreference }),
       setNotificationsEnabled: (notificationsEnabled) => set({ notificationsEnabled }),
       setAutoAcceptTrusted: (autoAcceptTrusted) => set({ autoAcceptTrusted }),
@@ -56,6 +60,7 @@ export const useSettingsStore = create<SettingsState>()(
       isTrusted: (id) => get().trustedDevices.some((d) => d.id === id),
       setSeedColor: (hex) => set({ seedColor: hex }),
       setPersonalInfo: (personalInfo) => set({ personalInfo }),
+      setUsernameLocal: (username) => set({ username }),
     }),
     { name: 'slip-settings', version: 1 },
   ),

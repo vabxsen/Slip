@@ -35,23 +35,29 @@ export function useCloudSync(): void {
       useSettingsStore.setState({
         personalInfo: remote.personalInfo,
         trustedDevices: remote.trustedDevices,
+        username: remote.username ?? null,
       });
       isApplyingRemoteRef.current = false;
     };
 
     void (async () => {
-      const { personalInfo, trustedDevices, trustDevice, setPersonalInfo } = useSettingsStore.getState();
-      const local: UserSettingsDoc = { personalInfo, trustedDevices };
+      const { personalInfo, trustedDevices, username, trustDevice, setPersonalInfo, setUsernameLocal } =
+        useSettingsStore.getState();
+      const local: UserSettingsDoc = { personalInfo, trustedDevices, username };
       const cloud = await fetchUserDocForMerge(uid, local);
       if (cancelled) return;
 
       if (cloud) {
-        // Merge non-destructively: cloud name wins if set, trusted devices
-        // are unioned (never destroyed) via the existing dedupe-by-id logic
-        // already built into trustDevice().
+        // Merge non-destructively: cloud name/username win if set, trusted
+        // devices are unioned (never destroyed) via the existing
+        // dedupe-by-id logic already built into trustDevice(). Username can
+        // only ever have been set via the claim transaction, so "cloud wins"
+        // here is really just "adopt whatever's already been claimed."
         isApplyingRemoteRef.current = true;
         const mergedFullName = cloud.personalInfo.fullName || local.personalInfo.fullName;
         if (mergedFullName !== local.personalInfo.fullName) setPersonalInfo({ fullName: mergedFullName });
+        const mergedUsername = cloud.username ?? local.username;
+        if (mergedUsername !== local.username) setUsernameLocal(mergedUsername);
         for (const device of cloud.trustedDevices) trustDevice(device);
         isApplyingRemoteRef.current = false;
 
@@ -59,6 +65,7 @@ export function useCloudSync(): void {
         await pushUserDoc(uid, {
           personalInfo: merged.personalInfo,
           trustedDevices: merged.trustedDevices,
+          username: merged.username,
         });
       }
       if (cancelled) return;
@@ -71,6 +78,11 @@ export function useCloudSync(): void {
       });
     })();
 
+    // Deliberately keyed on personalInfo/trustedDevices only — username is
+    // never pushed here. The claim transaction is the sole path that ever
+    // sets it, and the existing onSnapshot listener above propagates that
+    // to every device on its own; re-pushing it from a generic state
+    // change would be redundant at best.
     const unsubscribePush = useSettingsStore.subscribe((state, prevState) => {
       if (isApplyingRemoteRef.current) return;
       if (state.personalInfo === prevState.personalInfo && state.trustedDevices === prevState.trustedDevices) {
@@ -79,6 +91,7 @@ export function useCloudSync(): void {
       void pushUserDoc(uid, {
         personalInfo: state.personalInfo,
         trustedDevices: state.trustedDevices,
+        username: state.username,
       });
     });
 

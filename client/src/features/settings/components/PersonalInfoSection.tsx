@@ -5,18 +5,39 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { SectionCard } from '@/components/SectionCard';
 import { useAuthStore } from '@/features/auth/store/authStore';
+import { claimUsername } from '@/services/firestore/usernameCloud';
 import { useSettingsStore } from '@/store/settingsStore';
 import { showToast } from '@/store/toastStore';
+import { ClaimUsernameDialog } from './ClaimUsernameDialog';
 
 interface NameFormValues {
   fullName: string;
 }
 
+interface UsernameFormValues {
+  username: string;
+}
+
+const USERNAME_PATTERN = /^[a-zA-Z0-9_]{3,20}$/;
+
+const CLAIM_ERROR_MESSAGES = {
+  taken: 'That username is already taken',
+  'already-set': 'You already have a username set',
+  invalid: 'Enter a valid username',
+  offline: "Couldn't connect — check your connection and try again",
+  unknown: 'Something went wrong — try again',
+};
+
 export function PersonalInfoSection() {
   const user = useAuthStore((state) => state.user);
   const personalInfo = useSettingsStore((state) => state.personalInfo);
   const setPersonalInfo = useSettingsStore((state) => state.setPersonalInfo);
+  const username = useSettingsStore((state) => state.username);
+  const setUsernameLocal = useSettingsStore((state) => state.setUsernameLocal);
   const [isEditing, setIsEditing] = useState(false);
+  const [pendingUsername, setPendingUsername] = useState<string | null>(null);
+  const [isClaiming, setIsClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   const {
     register,
@@ -24,6 +45,13 @@ export function PersonalInfoSection() {
     reset,
     formState: { errors },
   } = useForm<NameFormValues>({ defaultValues: { fullName: personalInfo.fullName } });
+
+  const {
+    register: registerUsername,
+    handleSubmit: handleSubmitUsername,
+    reset: resetUsername,
+    formState: { errors: usernameErrors },
+  } = useForm<UsernameFormValues>({ defaultValues: { username: '' } });
 
   // Seed the name from the Google account on first sign-in — never
   // overwrites a name the user has already set or customized.
@@ -46,6 +74,28 @@ export function PersonalInfoSection() {
   const cancelEdit = () => {
     reset({ fullName: personalInfo.fullName });
     setIsEditing(false);
+  };
+
+  const onSubmitUsername = handleSubmitUsername((values) => {
+    setClaimError(null);
+    setPendingUsername(values.username);
+  });
+
+  const handleConfirmClaim = () => {
+    if (!pendingUsername || !user) return;
+    const chosen = pendingUsername;
+    setIsClaiming(true);
+    void claimUsername(user.uid, chosen).then((result) => {
+      setIsClaiming(false);
+      setPendingUsername(null);
+      if (result.ok) {
+        setUsernameLocal(chosen);
+        resetUsername({ username: '' });
+        showToast('Username claimed', 'success');
+      } else {
+        setClaimError(CLAIM_ERROR_MESSAGES[result.reason]);
+      }
+    });
   };
 
   return (
@@ -103,7 +153,57 @@ export function PersonalInfoSection() {
             {user?.email ?? 'Sign in with Google to link your email'}
           </Typography>
         </Stack>
+
+        <Stack>
+          <Typography variant="caption" color="text.secondary">
+            Username
+          </Typography>
+          {!user ? (
+            <Typography variant="body1" color="text.secondary">
+              Sign in with Google to claim a username
+            </Typography>
+          ) : username ? (
+            <Typography variant="body1" noWrap>
+              @{username}
+            </Typography>
+          ) : (
+            <form onSubmit={onSubmitUsername} noValidate>
+              <Stack direction="row" spacing={1.5} alignItems="flex-start" sx={{ mt: 0.5 }}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  label="Choose a username"
+                  autoComplete="off"
+                  error={Boolean(usernameErrors.username) || Boolean(claimError)}
+                  helperText={
+                    usernameErrors.username?.message ??
+                    claimError ??
+                    '3–20 characters: letters, numbers, underscores. Permanent once claimed.'
+                  }
+                  {...registerUsername('username', {
+                    required: 'Enter a username',
+                    pattern: {
+                      value: USERNAME_PATTERN,
+                      message: '3–20 characters: letters, numbers, underscores only',
+                    },
+                    onChange: () => setClaimError(null),
+                  })}
+                />
+                <Button type="submit" variant="outlined" disabled={isClaiming}>
+                  Claim
+                </Button>
+              </Stack>
+            </form>
+          )}
+        </Stack>
       </Stack>
+
+      <ClaimUsernameDialog
+        open={pendingUsername !== null}
+        username={pendingUsername ?? ''}
+        onClose={() => setPendingUsername(null)}
+        onConfirm={handleConfirmClaim}
+      />
     </SectionCard>
   );
 }

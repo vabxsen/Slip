@@ -54,6 +54,14 @@ export async function completeRedirectSignIn(): Promise<User | null> {
   return result?.user ?? null;
 }
 
+/** Fresh ID token for the signed-in user, or null if signed out/unconfigured. */
+export async function getIdToken(): Promise<string | null> {
+  const authInstance = getAuthInstance();
+  if (!authInstance) return null;
+  const auth = await authInstance;
+  return auth.currentUser ? auth.currentUser.getIdToken() : null;
+}
+
 export async function signOut(): Promise<void> {
   const authInstance = getAuthInstance();
   if (!authInstance) return;

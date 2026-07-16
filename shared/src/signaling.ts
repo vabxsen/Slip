@@ -1,5 +1,13 @@
 import type { DeviceInfo } from './device';
+import type { MessageReceivedPayload, MessageSendResult } from './messaging';
 import type { PairCreateResult, PairJoinResult } from './pairing';
+import type {
+  ConnectAcceptedPayload,
+  ConnectDeclinedPayload,
+  ConnectIncomingPayload,
+  ConnectRequestResult,
+  PresenceRegisterPayload,
+} from './presence';
 
 /** Serializable session description exchanged during the WebRTC handshake. */
 export interface RtcDescriptionPayload {
@@ -27,6 +35,16 @@ export interface ClientToServerEvents {
   'pair:leave': () => void;
   'signal:description': (payload: RtcDescriptionPayload) => void;
   'signal:candidate': (payload: RtcCandidatePayload) => void;
+  'presence:register': (payload: PresenceRegisterPayload, ack: (ok: boolean) => void) => void;
+  'connect:request': (
+    payload: { toUsername: string; fromDevice: DeviceInfo },
+    ack: (result: ConnectRequestResult) => void,
+  ) => void;
+  'connect:respond': (payload: { requestId: string; accept: boolean; device: DeviceInfo }) => void;
+  'message:send': (
+    payload: { toUsername: string; text: string },
+    ack: (result: MessageSendResult) => void,
+  ) => void;
 }
 
 export interface ServerToClientEvents {
@@ -34,10 +52,17 @@ export interface ServerToClientEvents {
   'peer:left': (peerId: string) => void;
   'signal:description': (payload: RtcDescriptionPayload) => void;
   'signal:candidate': (payload: RtcCandidatePayload) => void;
+  'connect:incoming': (payload: ConnectIncomingPayload) => void;
+  'connect:accepted': (payload: ConnectAcceptedPayload) => void;
+  'connect:declined': (payload: ConnectDeclinedPayload) => void;
+  'message:receive': (payload: MessageReceivedPayload) => void;
 }
 
 /** Per-socket state kept on the server. */
 export interface SocketData {
   device?: DeviceInfo;
   roomCode?: string;
+  uid?: string;
+  username?: string;
+  displayName?: string | null;
 }
