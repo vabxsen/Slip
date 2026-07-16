@@ -21,6 +21,7 @@ import { signInWithGoogle, signOut } from '@/services/auth/auth';
 import { showToast } from '@/store/toastStore';
 import { useAuthStore } from '../store/authStore';
 import { GoogleIcon } from './GoogleIcon';
+import { SignOutDialog } from './SignOutDialog';
 
 function initialsFrom(name: string | null, email: string | null): string {
   const source = name ?? email ?? '?';
@@ -32,6 +33,7 @@ export function AccountMenu() {
   const status = useAuthStore((state) => state.status);
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
   const open = Boolean(anchorEl);
 
   if (!firebaseConfigured()) return null;
@@ -48,8 +50,12 @@ export function AccountMenu() {
     }
   };
 
-  const handleSignOut = async () => {
+  const requestSignOut = () => {
     closeMenu();
+    setSignOutDialogOpen(true);
+  };
+
+  const handleSignOut = async () => {
     await signOut();
     showToast('Signed out', 'info');
   };
@@ -114,8 +120,8 @@ export function AccountMenu() {
               </ListItemIcon>
               Settings
             </MenuItem>,
-            <MenuItem key="signout" onClick={() => void handleSignOut()}>
-              <ListItemIcon>
+            <MenuItem key="signout" onClick={requestSignOut} sx={{ color: 'error.main' }}>
+              <ListItemIcon sx={{ color: 'inherit' }}>
                 <LogoutRoundedIcon fontSize="small" />
               </ListItemIcon>
               Sign out
@@ -130,6 +136,11 @@ export function AccountMenu() {
           </MenuItem>
         )}
       </Menu>
+      <SignOutDialog
+        open={signOutDialogOpen}
+        onClose={() => setSignOutDialogOpen(false)}
+        onConfirm={() => void handleSignOut()}
+      />
     </>
   );
 }

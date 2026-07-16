@@ -1,11 +1,13 @@
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import { Avatar, Button, CircularProgress, Stack, Typography } from '@mui/material';
+import { useState } from 'react';
 import { SectionCard } from '@/components/SectionCard';
 import { firebaseConfigured } from '@/services/firebase/firebaseApp';
 import { signInWithGoogle, signOut } from '@/services/auth/auth';
 import { showToast } from '@/store/toastStore';
 import { useAuthStore } from '../store/authStore';
 import { GoogleIcon } from './GoogleIcon';
+import { SignOutDialog } from './SignOutDialog';
 
 function initialsFrom(name: string | null, email: string | null): string {
   const source = name ?? email ?? '?';
@@ -15,6 +17,7 @@ function initialsFrom(name: string | null, email: string | null): string {
 export function AccountSection() {
   const user = useAuthStore((state) => state.user);
   const status = useAuthStore((state) => state.status);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
 
   const handleSignIn = async () => {
     try {
@@ -43,58 +46,65 @@ export function AccountSection() {
   }
 
   return (
-    <SectionCard title="Account">
-      {status === 'loading' ? (
-        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ py: 0.5 }}>
-          <CircularProgress size={20} />
-          <Typography variant="body2" color="text.secondary">
-            Checking sign-in status…
-          </Typography>
-        </Stack>
-      ) : user ? (
-        <Stack direction="row" spacing={2} alignItems="center">
-          <Avatar src={user.photoURL ?? undefined} sx={{ width: 44, height: 44 }}>
-            {initialsFrom(user.displayName, user.email)}
-          </Avatar>
-          <Stack sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="body1" fontWeight={500} noWrap>
-              {user.displayName ?? 'Signed in'}
+    <>
+      <SectionCard title="Account">
+        {status === 'loading' ? (
+          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ py: 0.5 }}>
+            <CircularProgress size={20} />
+            <Typography variant="body2" color="text.secondary">
+              Checking sign-in status…
             </Typography>
-            {user.email && (
-              <Typography variant="body2" color="text.secondary" noWrap>
-                {user.email}
-              </Typography>
-            )}
           </Stack>
-          <Button
-            size="small"
-            color="inherit"
-            startIcon={<LogoutRoundedIcon fontSize="small" />}
-            onClick={() => void handleSignOut()}
-          >
-            Sign out
-          </Button>
-        </Stack>
-      ) : (
-        <Stack spacing={1.5} alignItems="flex-start">
-          <Typography variant="body2" color="text.secondary">
-            Sign in to identify this device as yours.
-          </Typography>
-          <Button
-            variant="outlined"
-            onClick={() => void handleSignIn()}
-            sx={{
-              color: 'text.primary',
-              borderColor: 'm3.outlineVariant',
-              gap: 1,
-              textTransform: 'none',
-            }}
-          >
-            <GoogleIcon />
-            Sign in with Google
-          </Button>
-        </Stack>
-      )}
-    </SectionCard>
+        ) : user ? (
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar src={user.photoURL ?? undefined} sx={{ width: 44, height: 44 }}>
+              {initialsFrom(user.displayName, user.email)}
+            </Avatar>
+            <Stack sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body1" fontWeight={500} noWrap>
+                {user.displayName ?? 'Signed in'}
+              </Typography>
+              {user.email && (
+                <Typography variant="body2" color="text.secondary" noWrap>
+                  {user.email}
+                </Typography>
+              )}
+            </Stack>
+            <Button
+              size="small"
+              color="error"
+              startIcon={<LogoutRoundedIcon fontSize="small" />}
+              onClick={() => setSignOutDialogOpen(true)}
+            >
+              Sign out
+            </Button>
+          </Stack>
+        ) : (
+          <Stack spacing={1.5} alignItems="flex-start">
+            <Typography variant="body2" color="text.secondary">
+              Sign in to identify this device as yours.
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={() => void handleSignIn()}
+              sx={{
+                color: 'text.primary',
+                borderColor: 'm3.outlineVariant',
+                gap: 1,
+                textTransform: 'none',
+              }}
+            >
+              <GoogleIcon />
+              Sign in with Google
+            </Button>
+          </Stack>
+        )}
+      </SectionCard>
+      <SignOutDialog
+        open={signOutDialogOpen}
+        onClose={() => setSignOutDialogOpen(false)}
+        onConfirm={() => void handleSignOut()}
+      />
+    </>
   );
 }

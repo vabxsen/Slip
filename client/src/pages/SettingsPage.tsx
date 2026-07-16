@@ -2,6 +2,7 @@ import { Stack } from '@mui/material';
 import { AboutSection } from '@/features/settings/components/AboutSection';
 import { AppearanceSection } from '@/features/settings/components/AppearanceSection';
 import { DeviceSection } from '@/features/settings/components/DeviceSection';
+import { InstallAppSection } from '@/features/settings/components/InstallAppSection';
 import { NotificationsSection } from '@/features/settings/components/NotificationsSection';
 import { PersonalInfoSection } from '@/features/settings/components/PersonalInfoSection';
 import { TransferSettingsSection } from '@/features/settings/components/TransferSettingsSection';
@@ -21,6 +22,7 @@ export function SettingsPage() {
         <DeviceSection />
         <TransferSettingsSection />
         <NotificationsSection />
+        <InstallAppSection />
         <AboutSection />
       </Stack>
     </PageTransition>

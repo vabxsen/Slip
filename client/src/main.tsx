@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from '@/app/App';
 import { initAnalytics } from '@/services/analytics/analytics';
+import '@/store/installPromptStore';
 
 void initAnalytics();
 
