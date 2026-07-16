@@ -23,7 +23,7 @@ interface SettingsState {
   trustedDevices: TrustedDevice[];
   /** Hex seed color the whole M3 palette is derived from. */
   seedColor: string;
-  /** Stored locally only — Slip has no backend, so this never leaves the device. */
+  /** Local-only when signed out; synced to the user's Google account via Firestore when signed in — see useCloudSync. */
   personalInfo: PersonalInfo;
   setDownloadPreference: (pref: DownloadPreference) => void;
   setNotificationsEnabled: (enabled: boolean) => void;

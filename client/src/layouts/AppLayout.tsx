@@ -7,6 +7,7 @@ import { ToastHost } from '@/components/ToastHost';
 import { useAuthListener } from '@/features/auth/hooks/useAuthListener';
 import { useHistorySync } from '@/features/history/hooks/useHistorySync';
 import { useConnectionListeners } from '@/features/pairing/hooks/useConnectionListeners';
+import { useCloudSync } from '@/features/sync/hooks/useCloudSync';
 import { useIsDesktop } from '@/hooks/useIsDesktop';
 import { BottomNavBar } from './BottomNavBar';
 import { FabSlotHost, FabSlotProvider } from './FabSlot';
@@ -22,6 +23,7 @@ export function AppLayout() {
   useConnectionListeners();
   useHistorySync();
   useAuthListener();
+  useCloudSync();
 
   return (
     <FabSlotProvider>

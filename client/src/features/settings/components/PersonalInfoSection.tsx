@@ -52,7 +52,9 @@ export function PersonalInfoSection() {
     <SectionCard title="Personal info">
       <Stack spacing={2}>
         <Typography variant="body2" color="text.secondary">
-          Stored only on this device — Slip has no backend, so this never leaves your browser.
+          {user
+            ? 'Synced to your Google account — visible on any device you sign into.'
+            : 'Stored only on this device — sign in with Google to sync across devices.'}
         </Typography>
 
         {isEditing ? (

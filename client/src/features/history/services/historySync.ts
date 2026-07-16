@@ -1,4 +1,6 @@
+import { useAuthStore } from '@/features/auth/store/authStore';
 import { useActiveTransfersStore, type TransferRecord } from '@/features/transfer/store/activeTransfersStore';
+import { writeHistoryRecordToCloud } from '@/services/firestore/historyCloud';
 import { saveHistoryRecord } from '@/services/storage/historyDb';
 import { queryClient } from '@/app/queryClient';
 import type { HistoryRecord, HistoryStatus } from '../types';
@@ -37,9 +39,12 @@ export function initHistorySync(): () => void {
     for (const record of Object.values(state.records)) {
       if (TERMINAL_STATUSES.has(record.status) && !persistedIds.has(record.id)) {
         persistedIds.add(record.id);
-        void saveHistoryRecord(toHistoryRecord(record)).then(() => {
+        const historyRecord = toHistoryRecord(record);
+        void saveHistoryRecord(historyRecord).then(() => {
           void queryClient.invalidateQueries({ queryKey: HISTORY_QUERY_KEY });
         });
+        const uid = useAuthStore.getState().user?.uid;
+        if (uid) void writeHistoryRecordToCloud(uid, historyRecord);
       }
     }
   });
