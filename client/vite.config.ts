@@ -38,6 +38,11 @@ export default defineConfig({
       workbox: {
         // App-shell precache; offline navigations fall back to the cached SPA shell.
         navigateFallback: '/index.html',
+        // Firebase Hosting reserves /__/** for its own auth-handler and SDK-config
+        // endpoints — without this, the SW's SPA fallback swallows those
+        // navigations and serves our 404 page instead of Firebase's real response,
+        // silently breaking signInWithRedirect.
+        navigateFallbackDenylist: [/^\/__\//],
       },
     }),
   ],
