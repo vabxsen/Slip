@@ -1,3 +1,4 @@
+import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import { PAIR_CODE_LENGTH } from '@slip/shared';
 import { Alert, Button, Card, CardContent, CircularProgress, Stack, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -5,6 +6,7 @@ import { useSearchParams } from 'react-router';
 import { PageTransition } from '@/components/PageTransition';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { CodeInput } from '@/features/pairing/components/CodeInput';
+import { ScanQrDialog } from '@/features/pairing/components/ScanQrDialog';
 import { useJoinPair } from '@/features/pairing/hooks/useJoinPair';
 
 export function PairPage() {
@@ -13,6 +15,7 @@ export function PairPage() {
   const { join, state, error } = useJoinPair();
   const [code, setCode] = useState('');
   const [autoJoined, setAutoJoined] = useState(false);
+  const [scanOpen, setScanOpen] = useState(false);
 
   // Deep link: /pair?code=123456 prefills and auto-submits once.
   useEffect(() => {
@@ -26,6 +29,12 @@ export function PairPage() {
 
   const isJoining = state === 'joining';
   const canSubmit = code.length === PAIR_CODE_LENGTH && !isJoining;
+
+  const handleScanned = (scannedCode: string) => {
+    setScanOpen(false);
+    setCode(scannedCode);
+    void join(scannedCode);
+  };
 
   return (
     <PageTransition>
@@ -66,10 +75,23 @@ export function PairPage() {
               >
                 {isJoining ? 'Connecting…' : 'Connect'}
               </Button>
+
+              <Button
+                variant="outlined"
+                size="large"
+                fullWidth
+                disabled={isJoining}
+                onClick={() => setScanOpen(true)}
+                startIcon={<QrCodeScannerRoundedIcon fontSize="small" />}
+              >
+                Scan QR code
+              </Button>
             </Stack>
           </CardContent>
         </Card>
       </Stack>
+
+      <ScanQrDialog open={scanOpen} onClose={() => setScanOpen(false)} onScanned={handleScanned} />
     </PageTransition>
   );
 }
