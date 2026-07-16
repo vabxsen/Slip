@@ -7,6 +7,8 @@ import { EmptyState } from '@/components/EmptyState';
 import { PageTransition } from '@/components/PageTransition';
 import { showToast } from '@/store/toastStore';
 import { usePageTitle } from '@/hooks/usePageTitle';
+import { useAuthStore } from '@/features/auth/store/authStore';
+import { clearHistoryInCloud } from '@/services/firestore/historyCloud';
 import { clearHistory } from '@/services/storage/historyDb';
 import { ClearHistoryDialog } from '@/features/history/components/ClearHistoryDialog';
 import {
@@ -41,6 +43,11 @@ export function HistoryPage() {
   const hasAnyRecords = (records?.length ?? 0) > 0;
 
   const handleClear = async () => {
+    // Cloud first: the live history listener re-saves whatever it sees in
+    // Firestore into IndexedDB, so clearing local before cloud would let
+    // the just-cleared records sync straight back.
+    const uid = useAuthStore.getState().user?.uid;
+    if (uid) await clearHistoryInCloud(uid);
     await clearHistory();
     await queryClient.invalidateQueries({ queryKey: HISTORY_QUERY_KEY });
     showToast('Transfer history cleared', 'success');
