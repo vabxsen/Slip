@@ -45,12 +45,13 @@ export function HistoryFilters({
           },
         }}
       />
-      <Stack direction="row" spacing={1.5} useFlexGap flexWrap="wrap">
+      <Stack spacing={2}>
         <ToggleButtonGroup
           size="small"
           exclusive
           value={direction}
           onChange={(_, value: DirectionFilter | null) => value && onDirectionChange(value)}
+          sx={{ flexWrap: 'wrap' }}
         >
           <ToggleButton value="all">All</ToggleButton>
           <ToggleButton value="send">Sent</ToggleButton>
@@ -61,6 +62,7 @@ export function HistoryFilters({
           exclusive
           value={status}
           onChange={(_, value: StatusFilter | null) => value && onStatusChange(value)}
+          sx={{ flexWrap: 'wrap' }}
         >
           <ToggleButton value="all">Any status</ToggleButton>
           <ToggleButton value="completed">Completed</ToggleButton>
