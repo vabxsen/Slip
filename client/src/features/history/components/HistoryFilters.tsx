@@ -6,9 +6,22 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material/styles';
 
 export type DirectionFilter = 'all' | 'send' | 'receive';
 export type StatusFilter = 'all' | 'completed' | 'cancelled' | 'failed';
+
+/** Breaks ToggleButtonGroup's default fused-border look so each button reads as its own separate pill. */
+const separatedGroupSx: SxProps<Theme> = {
+  gap: 1,
+  flexWrap: 'wrap',
+  '& .MuiToggleButtonGroup-grouped': {
+    margin: 0,
+    border: '1px solid',
+    borderColor: 'm3.outlineVariant',
+    borderRadius: '999px !important',
+  },
+};
 
 interface HistoryFiltersProps {
   search: string;
@@ -51,7 +64,7 @@ export function HistoryFilters({
           exclusive
           value={direction}
           onChange={(_, value: DirectionFilter | null) => value && onDirectionChange(value)}
-          sx={{ flexWrap: 'wrap' }}
+          sx={separatedGroupSx}
         >
           <ToggleButton value="all">All</ToggleButton>
           <ToggleButton value="send">Sent</ToggleButton>
@@ -62,7 +75,7 @@ export function HistoryFilters({
           exclusive
           value={status}
           onChange={(_, value: StatusFilter | null) => value && onStatusChange(value)}
-          sx={{ flexWrap: 'wrap' }}
+          sx={separatedGroupSx}
         >
           <ToggleButton value="all">Any status</ToggleButton>
           <ToggleButton value="completed">Completed</ToggleButton>
