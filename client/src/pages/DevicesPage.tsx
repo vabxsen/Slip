@@ -8,7 +8,7 @@ export function DevicesPage() {
 
   return (
     <PageTransition>
-      <Stack spacing={2.5} sx={{ maxWidth: 720, mx: 'auto' }}>
+      <Stack spacing={2.5} sx={{ maxWidth: 880, mx: 'auto' }}>
         <Typography variant="h5" component="h1" fontWeight={500}>
           Your Devices
         </Typography>

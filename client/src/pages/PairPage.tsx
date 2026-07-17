@@ -1,6 +1,7 @@
 import QrCodeScannerRoundedIcon from '@mui/icons-material/QrCodeScannerRounded';
 import { PAIR_CODE_LENGTH } from '@slip/shared';
 import { Alert, Button, Card, CardContent, CircularProgress, Stack, Typography } from '@mui/material';
+import type { Theme } from '@mui/material/styles';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { PageTransition } from '@/components/PageTransition';
@@ -8,6 +9,7 @@ import { usePageTitle } from '@/hooks/usePageTitle';
 import { CodeInput } from '@/features/pairing/components/CodeInput';
 import { ScanQrDialog } from '@/features/pairing/components/ScanQrDialog';
 import { useJoinPair } from '@/features/pairing/hooks/useJoinPair';
+import { radius } from '@/theme';
 
 export function PairPage() {
   usePageTitle('Pair');
@@ -38,8 +40,17 @@ export function PairPage() {
 
   return (
     <PageTransition>
-      <Stack alignItems="center" sx={{ pt: { xs: 2, md: 5 } }}>
-        <Card sx={{ maxWidth: 440, width: '100%' }}>
+      <Stack
+        alignItems="center"
+        sx={{
+          pt: { xs: 2, md: 8 },
+          pb: { md: 8 },
+          backgroundImage: (theme: Theme) =>
+            `radial-gradient(ellipse 520px 360px at 50% 0%, color-mix(in srgb, ${(theme.vars ?? theme).palette.m3.primaryContainer} 22%, transparent), transparent 70%)`,
+          borderRadius: radius.xl,
+        }}
+      >
+        <Card sx={{ maxWidth: 480, width: '100%' }}>
           <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
             <Stack spacing={3} alignItems="center" textAlign="center">
               <Stack spacing={1} alignItems="center">

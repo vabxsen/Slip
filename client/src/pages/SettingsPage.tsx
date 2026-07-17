@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material';
+import { Grid } from '@mui/material';
 import { AboutSection } from '@/features/settings/components/AboutSection';
 import { AppearanceSection } from '@/features/settings/components/AppearanceSection';
 import { DeviceSection } from '@/features/settings/components/DeviceSection';
@@ -15,16 +15,32 @@ export function SettingsPage() {
 
   return (
     <PageTransition>
-      <Stack spacing={2.5} sx={{ maxWidth: 640, mx: 'auto' }}>
-        <AccountSection />
-        <PersonalInfoSection />
-        <AppearanceSection />
-        <DeviceSection />
-        <TransferSettingsSection />
-        <NotificationsSection />
-        <InstallAppSection />
-        <AboutSection />
-      </Stack>
+      <Grid container spacing={2.5} sx={{ maxWidth: 960, mx: 'auto' }}>
+        <Grid size={12}>
+          <AccountSection />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <PersonalInfoSection />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <AppearanceSection />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <DeviceSection />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <TransferSettingsSection />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <NotificationsSection />
+        </Grid>
+        <Grid size={{ xs: 12, md: 6 }}>
+          <InstallAppSection />
+        </Grid>
+        <Grid size={12}>
+          <AboutSection />
+        </Grid>
+      </Grid>
     </PageTransition>
   );
 }

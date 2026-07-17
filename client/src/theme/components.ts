@@ -45,6 +45,11 @@ export const components: Components<Theme> = {
       root: ({ theme }) => ({
         borderRadius: radius.lg,
         backgroundColor: (theme.vars ?? theme).palette.m3.surfaceContainerLow,
+        boxShadow: '0px 1px 2px 0px rgba(0,0,0,0.08), 0px 1px 3px 1px rgba(0,0,0,0.06)',
+        transition: 'box-shadow 0.2s ease, transform 0.2s ease',
+        ...theme.applyStyles('dark', {
+          boxShadow: '0px 1px 2px 0px rgba(0,0,0,0.35), 0px 1px 3px 1px rgba(0,0,0,0.22)',
+        }),
       }),
     },
   },
@@ -80,7 +85,16 @@ export const components: Components<Theme> = {
       paper: ({ theme }) => ({
         borderRadius: radius.xl,
         backgroundColor: (theme.vars ?? theme).palette.m3.surfaceContainerHigh,
+        boxShadow: '0px 4px 8px 3px rgba(0,0,0,0.10), 0px 1px 3px 0px rgba(0,0,0,0.14)',
+        ...theme.applyStyles('dark', {
+          boxShadow: '0px 4px 8px 3px rgba(0,0,0,0.45), 0px 1px 3px 0px rgba(0,0,0,0.35)',
+        }),
       }),
+    },
+  },
+  MuiBackdrop: {
+    styleOverrides: {
+      root: { backdropFilter: 'blur(2px)' },
     },
   },
   MuiMenu: {
@@ -88,6 +102,10 @@ export const components: Components<Theme> = {
       paper: ({ theme }) => ({
         borderRadius: radius.sm,
         backgroundColor: (theme.vars ?? theme).palette.m3.surfaceContainer,
+        boxShadow: '0px 2px 6px 2px rgba(0,0,0,0.10), 0px 1px 2px 0px rgba(0,0,0,0.14)',
+        ...theme.applyStyles('dark', {
+          boxShadow: '0px 2px 6px 2px rgba(0,0,0,0.40), 0px 1px 2px 0px rgba(0,0,0,0.30)',
+        }),
       }),
     },
   },
