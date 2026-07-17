@@ -1,7 +1,9 @@
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth, type Auth } from 'firebase-admin/auth';
+import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 
 let auth: Auth | null = null;
+let firestore: Firestore | null = null;
 
 /**
  * Lazily initializes the Firebase Admin SDK. No explicit credentials are
@@ -14,4 +16,12 @@ export function getAdminAuth(): Auth {
     auth = getAuth();
   }
   return auth;
+}
+
+export function getAdminFirestore(): Firestore {
+  if (!firestore) {
+    if (getApps().length === 0) initializeApp();
+    firestore = getFirestore();
+  }
+  return firestore;
 }

@@ -5,9 +5,18 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == uid;
       allow create: if request.auth != null && request.auth.uid == uid
         && (!('username' in request.resource.data) || request.resource.data.username == null);
+      // Once set, a username can never change (`request.resource... ==
+      // resource...`). The *first* claim must match a `usernames/{name}` doc
+      // this uid actually owns — otherwise a client could bypass the atomic
+      // claim transaction and set an unverified/already-claimed name here,
+      // which `publicProfiles` would then expose to every other user.
       allow update: if request.auth != null && request.auth.uid == uid
-        && (!('username' in resource.data) || resource.data.username == null
-            || request.resource.data.username == resource.data.username);
+        && (!('username' in request.resource.data) || request.resource.data.username == null
+            || (('username' in resource.data) && resource.data.username != null
+                && request.resource.data.username == resource.data.username)
+            || ((!('username' in resource.data) || resource.data.username == null)
+                && request.resource.data.username.lower().matches('^[a-z0-9_]{3,20}$')
+                && get(/databases/$(database)/documents/usernames/$(request.resource.data.username.lower())).data.uid == request.auth.uid));
       allow delete: if false;
 
       match /history/{historyId} {

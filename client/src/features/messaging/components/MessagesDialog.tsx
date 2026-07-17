@@ -154,6 +154,7 @@ export function MessagesDialog({ open, onClose }: MessagesDialogProps) {
                 value={text}
                 onChange={(event) => setText(event.target.value)}
                 onKeyDown={handleKeyDown}
+                slotProps={{ htmlInput: { maxLength: 2000 } }}
               />
               <IconButton onClick={() => void handleSend()} disabled={!text.trim()} color="primary">
                 <SendRoundedIcon />

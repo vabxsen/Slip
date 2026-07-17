@@ -3,6 +3,8 @@ import type { DeviceInfo } from '@slip/shared';
 import type { RoomRegistry } from '../../modules/pairing/roomRegistry';
 import type { PresenceRegistry } from '../../modules/presence/presenceRegistry';
 import { logger } from '../../utils/logger';
+import type { RateLimiter } from '../../utils/rateLimiter';
+import { sanitizeDevice } from '../../utils/validation';
 import type { SlipSocket, SlipSocketServer } from '../types';
 
 const REQUEST_TTL_MS = 30_000;
@@ -30,10 +32,15 @@ export function registerConnectRequestHandlers(
   io: SlipSocketServer,
   registry: RoomRegistry,
   presence: PresenceRegistry,
+  limiter: RateLimiter,
 ): void {
   socket.on('connect:request', ({ toUsername, fromDevice }, ack) => {
     if (!socket.data.username) {
       ack({ ok: false, reason: 'not-registered' });
+      return;
+    }
+    if (!limiter.allow(socket.id)) {
+      ack({ ok: false, reason: 'offline' });
       return;
     }
     if (toUsername === socket.data.username) {
@@ -48,19 +55,20 @@ export function registerConnectRequestHandlers(
       return;
     }
 
+    const safeFromDevice = sanitizeDevice(fromDevice);
     const requestId = randomUUID();
     const timeout = setTimeout(() => pendingRequests.delete(requestId), REQUEST_TTL_MS);
     timeout.unref?.();
     pendingRequests.set(requestId, {
       fromSocketId: socket.id,
-      fromDevice,
+      fromDevice: safeFromDevice,
       toSocketId: targetSocketId,
       timeout,
     });
 
     io.to(targetSocketId).emit('connect:incoming', {
       requestId,
-      fromDevice,
+      fromDevice: safeFromDevice,
       fromUsername: socket.data.username,
       fromDisplayName: socket.data.displayName ?? null,
     });
@@ -79,7 +87,8 @@ export function registerConnectRequestHandlers(
       return;
     }
 
-    const room = registry.createRoom({ socketId: socket.id, device });
+    const safeDevice = sanitizeDevice(device);
+    const room = registry.createRoom({ socketId: socket.id, device: safeDevice });
     socket.join(room.code);
     socket.data.roomCode = room.code;
 
@@ -98,7 +107,7 @@ export function registerConnectRequestHandlers(
     requesterSocket.join(room.code);
     requesterSocket.data.roomCode = room.code;
 
-    io.to(pending.fromSocketId).emit('connect:accepted', { requestId, peer: device });
+    io.to(pending.fromSocketId).emit('connect:accepted', { requestId, peer: safeDevice });
     // Direct to the accepter's own socket (not a room broadcast, which would
     // exclude the sender) — this reuses the exact same event the pair-code
     // flow's host side already listens for, so onPeerJoined's existing
