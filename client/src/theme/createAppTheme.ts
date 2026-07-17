@@ -45,12 +45,12 @@ function paletteFromScheme(m3: M3ColorScheme): PaletteOptions {
  * Colors are emitted as CSS variables (mode switching happens via a `data-*`
  * attribute swap — no React re-render, no flash).
  */
-export function createAppTheme(seed: string = SEED_COLOR): Theme {
+export function createAppTheme(seed: string = SEED_COLOR, highContrast = false): Theme {
   return createTheme({
     cssVariables: { colorSchemeSelector: 'data' },
     colorSchemes: {
       light: { palette: paletteFromScheme(buildM3Scheme(seed, false)) },
-      dark: { palette: paletteFromScheme(buildM3Scheme(seed, true)) },
+      dark: { palette: paletteFromScheme(buildM3Scheme(seed, true, highContrast)) },
     },
     shape,
     typography,

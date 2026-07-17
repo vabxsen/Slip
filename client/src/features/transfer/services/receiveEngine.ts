@@ -1,5 +1,6 @@
 import type { FileMeta, TransferControlMessage } from '@slip/shared';
 import { notify } from '@/services/notifications/notifications';
+import { playReceivedSound } from '@/services/sound/sound';
 import { useConnectionStore } from '@/store/connectionStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { showToast } from '@/store/toastStore';
@@ -147,6 +148,7 @@ export function handleReceiverControl(channel: RTCDataChannel, message: Transfer
           if (useSettingsStore.getState().notificationsEnabled) {
             notify('File received', { body: active.meta.name, tag: active.fileId });
           }
+          if (useSettingsStore.getState().soundEffectsEnabled) playReceivedSound();
         })
         .catch((error: unknown) => {
           console.error('[transfer] failed to finalize file', error);

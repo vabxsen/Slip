@@ -3,7 +3,16 @@ import ColorizeRoundedIcon from '@mui/icons-material/ColorizeRounded';
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined';
 import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import SettingsBrightnessOutlinedIcon from '@mui/icons-material/SettingsBrightnessOutlined';
-import { ButtonBase, Stack, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from '@mui/material';
+import {
+  ButtonBase,
+  FormControlLabel,
+  Stack,
+  Switch,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import { useRef, type ChangeEvent } from 'react';
 import { SectionCard } from '@/components/SectionCard';
 import { useThemeMode, type ThemeMode } from '@/hooks/useThemeMode';
@@ -69,6 +78,8 @@ export function AppearanceSection() {
   const { mode, setMode } = useThemeMode();
   const seedColor = useSettingsStore((state) => state.seedColor);
   const setSeedColor = useSettingsStore((state) => state.setSeedColor);
+  const highContrast = useSettingsStore((state) => state.highContrast);
+  const setHighContrast = useSettingsStore((state) => state.setHighContrast);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
   const isCustom = !PRESET_COLORS.some((preset) => sameColor(preset.hex, seedColor));
@@ -99,6 +110,23 @@ export function AppearanceSection() {
             Dark
           </ToggleButton>
         </ToggleButtonGroup>
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={highContrast}
+              onChange={(e) => setHighContrast(e.target.checked)}
+            />
+          }
+          label={
+            <Stack>
+              <Typography variant="body2">High contrast</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Makes dark mode&apos;s background pitch black
+              </Typography>
+            </Stack>
+          }
+        />
 
         <Stack spacing={1}>
           <Typography variant="subtitle2">Color palette</Typography>

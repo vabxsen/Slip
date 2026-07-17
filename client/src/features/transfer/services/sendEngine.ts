@@ -1,4 +1,6 @@
 import type { BatchOfferMessage, FileMeta, TransferControlMessage } from '@slip/shared';
+import { playSentSound } from '@/services/sound/sound';
+import { useSettingsStore } from '@/store/settingsStore';
 import { showToast } from '@/store/toastStore';
 import { readFileChunks, waitForDrain } from '../protocol/chunking';
 import { useActiveTransfersStore } from '../store/activeTransfersStore';
@@ -124,6 +126,7 @@ export async function sendSingleFile(
 
   sendControl(channel, { kind: 'file-end', batchId, fileId });
   patch(fileId, { status: 'completed', bytesTransferred: file.size, speedBps: 0, completedAt: Date.now() });
+  if (useSettingsStore.getState().soundEffectsEnabled) playSentSound();
 }
 
 /** Reacts to control messages relevant to transfers *we* are sending. */

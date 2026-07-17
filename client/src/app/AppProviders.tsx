@@ -13,7 +13,8 @@ interface AppProvidersProps {
 /** Global providers: M3 theme (light/dark via CSS variables) + React Query. */
 export function AppProviders({ children }: AppProvidersProps) {
   const seedColor = useSettingsStore((state) => state.seedColor);
-  const theme = useMemo(() => createAppTheme(seedColor), [seedColor]);
+  const highContrast = useSettingsStore((state) => state.highContrast);
+  const theme = useMemo(() => createAppTheme(seedColor, highContrast), [seedColor, highContrast]);
 
   return (
     <QueryClientProvider client={queryClient}>

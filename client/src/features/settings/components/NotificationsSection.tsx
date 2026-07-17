@@ -10,6 +10,8 @@ import { showToast } from '@/store/toastStore';
 export function NotificationsSection() {
   const enabled = useSettingsStore((state) => state.notificationsEnabled);
   const setEnabled = useSettingsStore((state) => state.setNotificationsEnabled);
+  const soundEnabled = useSettingsStore((state) => state.soundEffectsEnabled);
+  const setSoundEnabled = useSettingsStore((state) => state.setSoundEffectsEnabled);
   const supported = notificationsSupported();
 
   const handleToggle = async (checked: boolean) => {
@@ -27,25 +29,40 @@ export function NotificationsSection() {
 
   return (
     <SectionCard title="Notifications">
-      <FormControlLabel
-        control={
-          <Switch
-            checked={enabled}
-            disabled={!supported}
-            onChange={(e) => void handleToggle(e.target.checked)}
-          />
-        }
-        label={
-          <Stack>
-            <Typography variant="body2">System notifications</Typography>
-            <Typography variant="caption" color="text.secondary">
-              {supported
-                ? 'Get notified when a device connects or a file finishes downloading, even in another tab'
-                : 'Not supported in this browser'}
-            </Typography>
-          </Stack>
-        }
-      />
+      <Stack spacing={1.5}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={enabled}
+              disabled={!supported}
+              onChange={(e) => void handleToggle(e.target.checked)}
+            />
+          }
+          label={
+            <Stack>
+              <Typography variant="body2">System notifications</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {supported
+                  ? 'Get notified when a device connects or a file finishes downloading, even in another tab'
+                  : 'Not supported in this browser'}
+              </Typography>
+            </Stack>
+          }
+        />
+        <FormControlLabel
+          control={
+            <Switch checked={soundEnabled} onChange={(e) => setSoundEnabled(e.target.checked)} />
+          }
+          label={
+            <Stack>
+              <Typography variant="body2">Sound effects</Typography>
+              <Typography variant="caption" color="text.secondary">
+                Play a chime when a file finishes sending or downloading
+              </Typography>
+            </Stack>
+          }
+        />
+      </Stack>
     </SectionCard>
   );
 }

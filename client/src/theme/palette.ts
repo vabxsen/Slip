@@ -87,11 +87,24 @@ const ROLES: Record<keyof M3ColorScheme, DynamicColor> = {
   scrim: MaterialDynamicColors.scrim,
 };
 
-export function buildM3Scheme(seedHex: string, isDark: boolean): M3ColorScheme {
+export function buildM3Scheme(
+  seedHex: string,
+  isDark: boolean,
+  highContrast = false,
+): M3ColorScheme {
   const scheme = new SchemeTonalSpot(Hct.fromInt(argbFromHex(seedHex)), isDark, 0);
   const entries = Object.entries(ROLES).map(([role, color]) => [
     role,
     hexFromArgb(color.getArgb(scheme)),
   ]);
-  return Object.fromEntries(entries) as unknown as M3ColorScheme;
+  const result = Object.fromEntries(entries) as unknown as M3ColorScheme;
+
+  // High contrast dark mode: pitch-black background/app-bar instead of the
+  // computed tonal-gray surface. Containers (cards, dialogs, menus) keep
+  // their normal tones so they still stand out against the black backdrop.
+  if (isDark && highContrast) {
+    result.surface = '#000000';
+  }
+
+  return result;
 }
