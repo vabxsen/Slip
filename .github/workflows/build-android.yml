@@ -24,7 +24,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20.19'
+          # Capacitor 8's CLI requires Node >=22 (the rest of the repo only
+          # needs >=20.19 — this workflow just uses the newer version).
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
