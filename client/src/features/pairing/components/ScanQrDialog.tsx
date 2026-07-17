@@ -62,8 +62,14 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
     const canvas = canvasRef.current;
     const videoEl = videoRef.current;
 
+    // A hard `facingMode: 'environment'` constraint is treated as exact by
+    // some browsers and can fail outright (or, on some devices, resolve to
+    // a blank/black track) if the device's camera enumeration doesn't match
+    // it exactly. `ideal` makes it a preference instead of a requirement,
+    // and we still fall back to no constraint at all if that's rejected.
     navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: 'environment' } })
+      .getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
+      .catch(() => navigator.mediaDevices.getUserMedia({ video: true }))
       .then((stream) => {
         if (cancelled) {
           stream.getTracks().forEach((track) => track.stop());
@@ -71,7 +77,9 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
         }
         if (videoEl) {
           videoEl.srcObject = stream;
-          void videoEl.play();
+          videoEl.play().catch((err: unknown) => {
+            console.error('[ScanQrDialog] video.play() failed', err);
+          });
         }
         setState('scanning');
 
@@ -138,16 +146,25 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
             <video
               ref={videoRef}
               muted
+              autoPlay
               playsInline
               style={{
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
-                display: state === 'scanning' ? 'block' : 'none',
+                // Always rendered (never display:none) once we might have a
+                // stream attached — hiding it while playback starts is a
+                // common cause of a video element getting stuck on a blank
+                // frame in some browsers.
+                display: state === 'error' || state === 'unsupported' ? 'none' : 'block',
               }}
             />
             {state === 'requesting' && (
-              <Stack sx={{ position: 'absolute', inset: 0 }} alignItems="center" justifyContent="center">
+              <Stack
+                sx={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)' }}
+                alignItems="center"
+                justifyContent="center"
+              >
                 <CircularProgress size={28} sx={{ color: '#fff' }} />
               </Stack>
             )}
