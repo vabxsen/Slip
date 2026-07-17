@@ -31,3 +31,23 @@ function detectBrowser(): string {
 export function detectPlatformLabel(): string {
   return `${detectOs()} · ${detectBrowser()}`;
 }
+
+/** Recognizable default device name, e.g. "Windows PC", "iPhone", "Mac". */
+export function detectDeviceLabel(): string {
+  const os = detectOs();
+  const type = detectDeviceType();
+  switch (os) {
+    case 'iOS':
+      return type === 'tablet' ? 'iPad' : 'iPhone';
+    case 'macOS':
+      return 'Mac';
+    case 'Windows':
+      return 'Windows PC';
+    case 'Android':
+      return type === 'tablet' ? 'Android Tablet' : 'Android Phone';
+    case 'Linux':
+      return 'Linux PC';
+    default:
+      return type === 'phone' ? 'Phone' : type === 'tablet' ? 'Tablet' : 'Device';
+  }
+}

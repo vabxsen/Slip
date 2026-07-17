@@ -1,8 +1,7 @@
 import type { DeviceInfo } from '@slip/shared';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { generateDeviceName } from '@/utils/deviceName';
-import { detectDeviceType, detectPlatformLabel } from '@/utils/platform';
+import { detectDeviceLabel, detectDeviceType, detectPlatformLabel } from '@/utils/platform';
 
 interface DeviceState {
   /** This device's identity, as presented to peers. */
@@ -13,7 +12,7 @@ interface DeviceState {
 function createThisDevice(): DeviceInfo {
   return {
     id: crypto.randomUUID(),
-    name: generateDeviceName(),
+    name: detectDeviceLabel(),
     type: detectDeviceType(),
     platform: detectPlatformLabel(),
   };
