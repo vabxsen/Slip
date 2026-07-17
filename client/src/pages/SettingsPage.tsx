@@ -2,7 +2,6 @@ import { Grid } from '@mui/material';
 import { AboutSection } from '@/features/settings/components/AboutSection';
 import { AppearanceSection } from '@/features/settings/components/AppearanceSection';
 import { DeviceSection } from '@/features/settings/components/DeviceSection';
-import { InstallApkSection } from '@/features/settings/components/InstallApkSection';
 import { InstallAppSection } from '@/features/settings/components/InstallAppSection';
 import { NotificationsSection } from '@/features/settings/components/NotificationsSection';
 import { PersonalInfoSection } from '@/features/settings/components/PersonalInfoSection';
@@ -37,9 +36,6 @@ export function SettingsPage() {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
           <InstallAppSection />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <InstallApkSection />
         </Grid>
         <Grid size={12}>
           <AboutSection />
