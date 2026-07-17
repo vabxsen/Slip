@@ -15,7 +15,7 @@ export default defineConfig({
         short_name: 'Slip',
         description: 'The easiest way to transfer files between any device.',
         theme_color: '#0b57d0',
-        background_color: '#f9f9ff',
+        background_color: '#faf8ff',
         display: 'standalone',
         start_url: '/',
         icons: [
