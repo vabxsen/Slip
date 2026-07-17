@@ -1,4 +1,5 @@
 import { BottomNavigation, BottomNavigationAction, Box, Paper } from '@mui/material';
+import { motion } from 'motion/react';
 import { Link, useLocation } from 'react-router';
 import { NAV_ITEMS } from './navItems';
 
@@ -7,7 +8,7 @@ interface IconPillProps {
   children: React.ReactNode;
 }
 
-/** M3 active indicator: a small pill behind the icon. */
+/** M3 active indicator: a small pill behind the icon, with a tap-squish + activation pop. */
 function IconPill({ active, children }: IconPillProps) {
   return (
     <Box
@@ -23,7 +24,14 @@ function IconPill({ active, children }: IconPillProps) {
         transition: 'background-color 0.2s',
       }}
     >
-      {children}
+      <motion.div
+        whileTap={{ scale: 0.72, rotate: -10 }}
+        animate={active ? { scale: [1, 1.35, 0.95, 1.1, 1], rotate: [0, -12, 10, -4, 0] } : { scale: 1, rotate: 0 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+        style={{ display: 'grid', placeItems: 'center' }}
+      >
+        {children}
+      </motion.div>
     </Box>
   );
 }

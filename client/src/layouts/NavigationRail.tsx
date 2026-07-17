@@ -43,7 +43,14 @@ function RailItem({ item, active }: RailItemProps) {
             }}
           />
         )}
-        <Icon sx={{ position: 'relative', fontSize: 22 }} />
+        <motion.div
+          whileTap={{ scale: 0.72, rotate: -10 }}
+          animate={active ? { scale: [1, 1.35, 0.95, 1.1, 1], rotate: [0, -12, 10, -4, 0] } : { scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 14 }}
+          style={{ position: 'relative', display: 'grid', placeItems: 'center' }}
+        >
+          <Icon sx={{ fontSize: 22 }} />
+        </motion.div>
       </Box>
       <Typography
         variant="caption"
