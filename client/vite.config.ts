@@ -15,7 +15,10 @@ export default defineConfig({
         short_name: 'Slip',
         description: 'The easiest way to transfer files between any device.',
         theme_color: '#0b57d0',
-        background_color: '#faf8ff',
+        // Native launch-splash background (icon + this color, shown by the
+        // OS before any of our JS runs). Pitch black by design — see
+        // index.html's inline preboot loader for the matching in-page look.
+        background_color: '#000000',
         display: 'standalone',
         start_url: '/',
         icons: [
