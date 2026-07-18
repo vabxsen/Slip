@@ -18,6 +18,10 @@ interface TransferState {
   stageFiles: (files: StageInput[]) => void;
   unstageFile: (id: string) => void;
   clearStaged: () => void;
+  /** One-shot signal: SendFab opens the file picker on its next mount, then clears this. */
+  autoOpenPicker: boolean;
+  requestAutoOpenPicker: () => void;
+  clearAutoOpenPicker: () => void;
 }
 
 export const useTransferStore = create<TransferState>((set) => ({
@@ -31,4 +35,7 @@ export const useTransferStore = create<TransferState>((set) => ({
     })),
   unstageFile: (id) => set((state) => ({ staged: state.staged.filter((f) => f.id !== id) })),
   clearStaged: () => set({ staged: [] }),
+  autoOpenPicker: false,
+  requestAutoOpenPicker: () => set({ autoOpenPicker: true }),
+  clearAutoOpenPicker: () => set({ autoOpenPicker: false }),
 }));

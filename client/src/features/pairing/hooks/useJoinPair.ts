@@ -6,6 +6,7 @@ import { peerSession } from '@/services/webrtc/peerSession';
 import { useConnectionStore } from '@/store/connectionStore';
 import { useDeviceStore } from '@/store/deviceStore';
 import { showToast } from '@/store/toastStore';
+import { useTransferStore } from '@/features/transfer/store/transferStore';
 import { joinRoom } from '../services/pairingClient';
 
 export type JoinState = 'idle' | 'joining' | 'error';
@@ -34,6 +35,7 @@ export function useJoinPair() {
         // Joiner drives the WebRTC handshake (opens the data channel → offer).
         peerSession.start('initiator', result.peer);
         showToast(`Connected to ${result.peer.name}`, 'success');
+        useTransferStore.getState().requestAutoOpenPicker();
         navigate(ROUTES.home);
         return;
       }

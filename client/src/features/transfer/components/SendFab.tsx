@@ -1,6 +1,7 @@
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import { Fab } from '@mui/material';
 import { motion } from 'motion/react';
+import { useEffect } from 'react';
 import { PageFab } from '@/layouts/FabSlot';
 import { useIsDesktop } from '@/hooks/useIsDesktop';
 import { showToast } from '@/store/toastStore';
@@ -12,6 +13,8 @@ import type { TraversedFile } from '../utils/directoryEntries';
 export function SendFab() {
   const isDesktop = useIsDesktop();
   const stageFiles = useTransferStore((state) => state.stageFiles);
+  const autoOpenPicker = useTransferStore((state) => state.autoOpenPicker);
+  const clearAutoOpenPicker = useTransferStore((state) => state.clearAutoOpenPicker);
 
   const handleFiles = (files: TraversedFile[]) => {
     stageFiles(files);
@@ -22,6 +25,18 @@ export function SendFab() {
   };
 
   const { openPicker, input } = useFilePicker(handleFiles);
+
+  useEffect(() => {
+    if (!autoOpenPicker) return;
+    clearAutoOpenPicker();
+    // Just paired via QR/code — jump straight into picking files to send,
+    // skipping the extra tap on this button. Browsers only honor
+    // input.click() with a fresh-enough user gesture behind it; if the
+    // pairing round-trip + navigation ate that window, this silently
+    // no-ops and the button is still right here to tap manually.
+    openPicker();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpenPicker]);
 
   return (
     <PageFab>
