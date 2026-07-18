@@ -47,7 +47,7 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set, get) => ({
-      downloadPreference: 'ask',
+      downloadPreference: 'auto',
       notificationsEnabled: false,
       soundEffectsEnabled: true,
       autoAcceptTrusted: false,
