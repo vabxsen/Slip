@@ -1,9 +1,10 @@
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
-import { Fab } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Fab } from '@mui/material';
 import { motion } from 'motion/react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { PageFab } from '@/layouts/FabSlot';
 import { useIsDesktop } from '@/hooks/useIsDesktop';
+import { useConnectionStore } from '@/store/connectionStore';
 import { showToast } from '@/store/toastStore';
 import { useFilePicker } from '../hooks/useFilePicker';
 import { useTransferStore } from '../store/transferStore';
@@ -15,6 +16,8 @@ export function SendFab() {
   const stageFiles = useTransferStore((state) => state.stageFiles);
   const autoOpenPicker = useTransferStore((state) => state.autoOpenPicker);
   const clearAutoOpenPicker = useTransferStore((state) => state.clearAutoOpenPicker);
+  const peers = useConnectionStore((state) => state.peers);
+  const [showConnectedPrompt, setShowConnectedPrompt] = useState(false);
 
   const handleFiles = (files: TraversedFile[]) => {
     stageFiles(files);
@@ -29,14 +32,18 @@ export function SendFab() {
   useEffect(() => {
     if (!autoOpenPicker) return;
     clearAutoOpenPicker();
-    // Just paired via QR/code — jump straight into picking files to send,
-    // skipping the extra tap on this button. Browsers only honor
-    // input.click() with a fresh-enough user gesture behind it; if the
-    // pairing round-trip + navigation ate that window, this silently
-    // no-ops and the button is still right here to tap manually.
+    // Just paired via QR/code — show an in-app prompt rather than jumping
+    // straight to the native file manager, so the user isn't surprised by
+    // an OS picker appearing right after pairing with no context.
+    setShowConnectedPrompt(true);
+  }, [autoOpenPicker, clearAutoOpenPicker]);
+
+  const latestPeerName = [...peers].sort((a, b) => b.connectedAt - a.connectedAt)[0]?.name;
+
+  const handleChooseFiles = () => {
+    setShowConnectedPrompt(false);
     openPicker();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoOpenPicker]);
+  };
 
   return (
     <PageFab>
@@ -58,6 +65,20 @@ export function SendFab() {
         </Fab>
       </motion.div>
       {input}
+      <Dialog open={showConnectedPrompt} onClose={() => setShowConnectedPrompt(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Connected{latestPeerName ? ` to ${latestPeerName}` : ''}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Choose the files you&apos;d like to send.</DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button onClick={() => setShowConnectedPrompt(false)} color="inherit">
+            Not now
+          </Button>
+          <Button variant="contained" onClick={handleChooseFiles}>
+            Choose files
+          </Button>
+        </DialogActions>
+      </Dialog>
     </PageFab>
   );
 }
