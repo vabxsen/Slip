@@ -8,6 +8,8 @@
   No accounts required. No file size limits. No uploads to a server.
   Just pair two devices and send — directly, peer-to-peer, encrypted.
 
+  **🌐 Live app → [slip6.web.app](https://slip6.web.app)**
+
   [![Live App](https://img.shields.io/badge/live-slip6.web.app-0b57d0?style=flat-square)](https://slip6.web.app)
   [![License: MIT](https://img.shields.io/badge/license-MIT-black?style=flat-square)](LICENSE)
   [![Built with React 19](https://img.shields.io/badge/react-19-149ECA?style=flat-square&logo=react)](client/package.json)
