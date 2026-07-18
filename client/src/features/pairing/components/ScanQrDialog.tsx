@@ -60,7 +60,7 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
 
     if (!canvasRef.current) canvasRef.current = document.createElement('canvas');
     const canvas = canvasRef.current;
-    const videoEl = videoRef.current;
+    let activeStream: MediaStream | null = null;
 
     // A hard `facingMode: 'environment'` constraint is treated as exact by
     // some browsers and can fail outright (or, on some devices, resolve to
@@ -75,6 +75,13 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
           stream.getTracks().forEach((track) => track.stop());
           return;
         }
+        activeStream = stream;
+        // Deliberately NOT captured before this async gap: MUI's Dialog
+        // mounts its content (this <video>) in a render pass that can lag
+        // behind the `open` prop flipping, so a ref read at the top of this
+        // effect can still be null. By now — after a real getUserMedia
+        // round-trip — the element is guaranteed to exist.
+        const videoEl = videoRef.current;
         if (videoEl) {
           videoEl.srcObject = stream;
           videoEl.play().catch((err: unknown) => {
@@ -85,10 +92,11 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
 
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         const tick = () => {
-          if (videoEl && ctx && videoEl.readyState === videoEl.HAVE_ENOUGH_DATA) {
-            canvas.width = videoEl.videoWidth;
-            canvas.height = videoEl.videoHeight;
-            ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+          const video = videoRef.current;
+          if (video && ctx && video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const result = jsQR(imageData.data, imageData.width, imageData.height);
             const code = result && extractPairCode(result.data);
@@ -117,9 +125,12 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
     return () => {
       cancelled = true;
       cancelAnimationFrame(frameRef.current);
-      const stream = videoEl?.srcObject;
-      if (stream instanceof MediaStream) stream.getTracks().forEach((track) => track.stop());
-      if (videoEl) videoEl.srcObject = null;
+      activeStream?.getTracks().forEach((track) => track.stop());
+      // Deliberately reading the ref live here rather than a captured
+      // variable — see the comment above on why this component can't trust
+      // an early-captured ref.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      if (videoRef.current) videoRef.current.srcObject = null;
     };
   }, [open]);
 
@@ -137,8 +148,6 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
             sx={{
               width: '100%',
               aspectRatio: '1',
-              borderRadius: '16px',
-              overflow: 'hidden',
               backgroundColor: '#000',
               position: 'relative',
             }}
@@ -152,6 +161,12 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
                 width: '100%',
                 height: '100%',
                 objectFit: 'cover',
+                // Rounding lives on the video itself, not a wrapping
+                // overflow:hidden container — that combination is a known
+                // cause of hardware-accelerated <video> rendering solid
+                // black on Android Chrome (the rounded-corner clip conflicts
+                // with the video's own GPU compositing layer).
+                borderRadius: '16px',
                 // Always rendered (never display:none) once we might have a
                 // stream attached — hiding it while playback starts is a
                 // common cause of a video element getting stuck on a blank
@@ -161,7 +176,12 @@ export function ScanQrDialog({ open, onClose, onScanned }: ScanQrDialogProps) {
             />
             {state === 'requesting' && (
               <Stack
-                sx={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)' }}
+                sx={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '16px',
+                  backgroundColor: 'rgba(0,0,0,0.4)',
+                }}
                 alignItems="center"
                 justifyContent="center"
               >
